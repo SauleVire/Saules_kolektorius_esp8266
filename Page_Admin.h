@@ -14,7 +14,7 @@ const char PAGE_AdminMainPage[] PROGMEM = R"=====(
 <div align="center"><a href="info.html"   style="width:252px"  class="btn btn--m btn--blue" >Tinklo informacija</a></div>
 <div align="center"><a href="kolektorius.html" style="width:252px"  class="btn btn--m btn--blue" >Kolektoriaus parametrai</a></div>
 <div align="center"><a href="emoncms.html" style="width:252px"  class="btn btn--m btn--blue" >Emoncms parametrai</a></div>
-<div align="center"><a href="ds18b20.html" style="width:252px"  class="btn btn--m btn--blue" >DS18B20 parametrai</a></div>
+<div align="center"><a href="/rastids18b20.html" style="width:252px"  class="btn btn--m btn--blue" >DS18B20 parametrai</a></div>
 <div align="center"><a href="ntp.html"   style="width:252px"  class="btn btn--m btn--blue" >NTP nustatymai</a></div>
 <div align="center"><a href="/"   style="width:250px"  class="btn btn--m btn--blue" >Noriu namo!</a></div>
 

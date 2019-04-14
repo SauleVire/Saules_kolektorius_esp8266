@@ -7,10 +7,12 @@ const char PAGE_Emoncms[] PROGMEM = R"=====(
   <div class="content">
 <center><a href="admin.html"  class="btn btn--s"><</a>
 <strong>Emoncms nustatymai</strong>
-<a href="ds18b20.html"  class="btn btn--s">></a></center>
+<a href="/rastids18b20.html"  class="btn btn--s">></a></center>
 <hr>
 <form action="" method="get">
 <table border="0"  cellspacing="0" cellpadding="3" >
+<tr><td align="right">Serveris :</td><td><input type="text" id="emoncmsSrv" name="emoncmsSrv" size="15" maxlength="15" value=""></td></tr>
+<tr><td align="right">Raktas :</td><td><input type="text" id="apikey" name="apikey" size="15" maxlength="20" value=""></td></tr>
 <tr><td align="right">Reikšmė 1 :</td><td><input type="text" id="reiksme1" name="reiksme1" size="5" maxlength="6" value=""></td></tr>
 <tr><td align="right">Reikšmė 2 :</td><td><input type="text" id="reiksme2" name="reiksme2" size="5" maxlength="6" value=""></td></tr>
 <tr><td align="right">Reikšmė 3 :</td><td><input type="text" id="reiksme3" name="reiksme3" size="5" maxlength="6" value=""></td></tr>
@@ -59,6 +61,8 @@ void send_Emoncms_html()
     config.emoncmsOn = false;
     String temp = "";
     for ( uint8_t i = 0; i < server.args(); i++ ) {
+      if (server.argName(i) == "emoncmsSrv") config.emoncmsSrv = urldecode( server.arg(i)); 
+      if (server.argName(i) == "apikey") config.apikey = urldecode( server.arg(i)); 
       if (server.argName(i) == "reiksme1") config.reiksme1 = urldecode( server.arg(i)); 
       if (server.argName(i) == "reiksme2") config.reiksme2 = urldecode( server.arg(i)); 
       if (server.argName(i) == "reiksme3") config.reiksme3 = urldecode( server.arg(i)); 
@@ -77,6 +81,8 @@ void send_Emoncms_html()
 void send_Emoncms_values_html()
 {  
   String values ="";
+  values += "emoncmsSrv|" + (String) config.emoncmsSrv + "|input\n";
+  values += "apikey|" + (String) config.apikey + "|input\n";
   values += "reiksme1|" + (String) config.reiksme1 + "|input\n";
   values += "reiksme2|" +  (String) config.reiksme2 + "|input\n";
   values += "reiksme3|" +  (String) config.reiksme3 + "|input\n";

@@ -17,6 +17,7 @@ const char PAGE_Information[] PROGMEM = R"=====(
 <table border="0"  cellspacing="0" cellpadding="3" style="width:300px" >
 <tr><td align="right">SSID :</td><td><span id="x_ssid"></span></td></tr>
 <tr><td align="right">Tinklo adresas :</td><td><span id="x_ip"></span></td></tr>
+<tr><td align="right">Dns adresas :</td><td><span id="x_dns"></span></td></tr>
 <tr><td align="right">Tinklo kaukė :</td><td><span id="x_netmask"></span></td></tr>
 <tr><td align="right">Tinklų sietuvas :</td><td><span id="x_gateway"></span></td></tr>
 <tr><td align="right">Mac :</td><td><span id="x_mac"></span></td></tr>
@@ -64,6 +65,7 @@ void send_information_values_html ()
 
   values += "x_ssid|" + (String)WiFi.SSID() +  "|div\n";
   values += "x_ip|" +  (String) WiFi.localIP()[0] + "." +  (String) WiFi.localIP()[1] + "." +  (String) WiFi.localIP()[2] + "." + (String) WiFi.localIP()[3] +  "|div\n";
+  values += "x_dns|" +  (String) WiFi.dnsIP()[0] + "." +  (String) WiFi.dnsIP()[1] + "." +  (String) WiFi.dnsIP()[2] + "." + (String) WiFi.dnsIP()[3] +  "|div\n";
   values += "x_gateway|" +  (String) WiFi.gatewayIP()[0] + "." +  (String) WiFi.gatewayIP()[1] + "." +  (String) WiFi.gatewayIP()[2] + "." + (String) WiFi.gatewayIP()[3] +  "|div\n";
   values += "x_netmask|" +  (String) WiFi.subnetMask()[0] + "." +  (String) WiFi.subnetMask()[1] + "." +  (String) WiFi.subnetMask()[2] + "." + (String) WiFi.subnetMask()[3] +  "|div\n";
   values += "x_mac|" + GetMacAddress() +  "|div\n";

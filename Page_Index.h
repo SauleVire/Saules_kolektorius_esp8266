@@ -32,7 +32,11 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <th colspan=2><a href="/"  class="btn btn--s">Atnaujinti</a></th>
 </table>
 <hr>
-Dabar : <span id="x_ntp"></span><br><br>
+Dabar : <span id="x_ntp"></span><br>
+Valdiklis veikia <span id="x_ntp2"></span> nuo <span id="x_ntp2"></span><br>
+
+
+
 <p><small><a href=https://saulevire.lt>SauleVire.lt</a> 2019</small></p>
 </div>
 </div>
@@ -66,8 +70,10 @@ void filldynamicdata()
   values += "rele|" + (String)relayState +  "|div\n";
   values += "laikas|" + (String) config.intervalas  +  "|div\n";
   values += "sauga|" + (String)config.apsauga +  "|div\n";
-  values += "x_ntp|" + (String)   DateTime.year + "." + (String)  DateTime.month + "." + (String)  DateTime.day +  " " +  (String) DateTime.hour + ":" + (String) + DateTime.minute +  ":" + (String)  DateTime.second + " |div\n";
-    server.send ( 200, "text/plain", values);   
+  values += "x_ntp|" + (String)DateTime.year + "." + (String)DateTime.month + "." + (String)DateTime.day + " " + (String)DateTime.hour + ":" + (String)DateTime.minute + ":" + (String)DateTime.second + " |div\n";
+values += "x_ntp2|" + (String)(NTP.getTimeDateString (NTP.getFirstSync ()).c_str ())+ " |div\n";
+values += "x_ntp1|" + (String)(NTP.getUptimeString ())+ " |div\n";
+    server.send ( 200, "text/plain", values); 
 }
 
 void processIndex()

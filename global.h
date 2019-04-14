@@ -23,7 +23,8 @@ unsigned long previousMillis1 = 0;       // will store last temp was read, emonc
 struct strConfig {
 	String ssid;
 	String password;
-	byte  IP[4];
+  byte  IP[4];
+  byte  DNS[4];
 	byte  Netmask[4];
 	byte  Gateway[4];
 	boolean dhcp;
@@ -45,12 +46,17 @@ struct strConfig {
  int skirtumasoff;
  long intervalas;
  boolean apsauga;
+  String emoncmsSrv;
+  String apikey;
   String reiksme1;
   String reiksme2;
   String reiksme3;
   String katalogas;
   long intervalasEmon;
   boolean emoncmsOn;
+  byte Kid;
+  byte Bid;
+  byte Oid;
 }   config;
 
 /*
@@ -90,6 +96,7 @@ static long timer_freezing=0;   // apsaugos nuo užšalimo tikrinimo laikas
 
 
 uint8_t kolektorius[8] = { 0x28, 0xd7, 0x3d, 0xdd, 0x03, 0x00, 0x00, 0x4f  };
+DeviceAddress Kolektorius_Adr = { 0x28, 0xFF, 0x6C, 0x2E, 0x77, 0x04, 0x00, 0xB3 };// test adr
 // 0x28, 0xd7, 0x3d, 0xdd, 0x03, 0x00, 0x00, 0x4f
 uint8_t boileris[8] = { 0x28, 0x22, 0x08, 0xcc, 0x04, 0x00, 0x00, 0x4d  };
 // 0x28, 0x22, 0x08, 0xcc, 0x04, 0x00, 0x00, 0x4d
@@ -104,8 +111,10 @@ String relayState = "OFF";
 ** emoncms duomenų siuntimas
 **
 */
-const char* emoncmshost = "saulevire.lt"; //Enter the EmonCMS Server address here
-const char* apikey = "xxxxxxxxxxxxxxx"; //Enter api key here
+// viskas konvigūruojama naršyklę!
+//
+//const char* emoncmshost = "xxx"; //Enter the EmonCMS Server address here
+//const char* apikey = "xxx"; //Enter api key here
 
 /*
 **
@@ -119,7 +128,7 @@ void ConfigureWifi()
   WiFi.hostname("SauleVire");
 	if (!config.dhcp)
 	{
-		WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
+		WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.DNS[0],config.DNS[1],config.DNS[2],config.DNS[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
 
   Serial.println("IP adresas: " + WiFi.localIP().toString()+ "\n");
   Serial.print("SSID'as: " + config.ssid+ "\n");
@@ -135,6 +144,9 @@ void WriteConfig()
 	EEPROM.write(1,'F');
 	EEPROM.write(2,'G');
 
+  EEPROM.write(11,config.Kid);
+  EEPROM.write(12,config.Bid);
+  EEPROM.write(13,config.Oid);
   EEPROM.write(14,config.emoncmsOn);
   EEPROM.write(15,config.apsauga);
   EEPROM.write(16,config.dhcp);
@@ -147,22 +159,27 @@ void WriteConfig()
 	EEPROM.write(27,config.LED_G);
 	EEPROM.write(28,config.LED_B);
 
-	EEPROM.write(32,config.IP[0]);
-	EEPROM.write(33,config.IP[1]);
-	EEPROM.write(34,config.IP[2]);
-	EEPROM.write(35,config.IP[3]);
+  EEPROM.write(32,config.IP[0]);
+  EEPROM.write(33,config.IP[1]);
+  EEPROM.write(34,config.IP[2]);
+  EEPROM.write(35,config.IP[3]);
 
-	EEPROM.write(36,config.Netmask[0]);
-	EEPROM.write(37,config.Netmask[1]);
-	EEPROM.write(38,config.Netmask[2]);
-	EEPROM.write(39,config.Netmask[3]);
+  EEPROM.write(36,config.DNS[0]);
+  EEPROM.write(37,config.DNS[1]);
+  EEPROM.write(33,config.DNS[2]);
+  EEPROM.write(39,config.DNS[3]);
 
-	EEPROM.write(40,config.Gateway[0]);
-	EEPROM.write(41,config.Gateway[1]);
-	EEPROM.write(42,config.Gateway[2]);
-  EEPROM.write(43,config.Gateway[3]);
-  EEPROM.write(44,config.intervalas); //4 bitai
-  EEPROM.write(48,config.intervalasEmon); //4 bitai
+	EEPROM.write(40,config.Netmask[0]);
+	EEPROM.write(41,config.Netmask[1]);
+	EEPROM.write(42,config.Netmask[2]);
+	EEPROM.write(43,config.Netmask[3]);
+
+	EEPROM.write(44,config.Gateway[0]);
+	EEPROM.write(44,config.Gateway[1]);
+	EEPROM.write(46,config.Gateway[2]);
+  EEPROM.write(47,config.Gateway[3]);
+  EEPROM.write(48,config.intervalas); //4 bitai
+  EEPROM.write(52,config.intervalasEmon); //4 bitai
 
 	WriteStringToEEPROM(64,config.ssid);
 	WriteStringToEEPROM(96,config.password);
@@ -182,6 +199,8 @@ void WriteConfig()
   WriteStringToEEPROM(328,config.reiksme2);
   WriteStringToEEPROM(335,config.reiksme3);
   WriteStringToEEPROM(342,config.katalogas);
+  WriteStringToEEPROM(350,config.apikey);
+  WriteStringToEEPROM(366,config.emoncmsSrv); //laisva nuo 388
 
 
 	
@@ -196,6 +215,9 @@ boolean ReadConfig()
 	if (EEPROM.read(0) == 'C' && EEPROM.read(1) == 'F'  && EEPROM.read(2) == 'G' )
 	{
 		Serial.println("Configurarion Found!");
+    config.Kid =   EEPROM.read(11);
+    config.Bid =   EEPROM.read(12);
+    config.Oid =   EEPROM.read(13);
     config.emoncmsOn =   EEPROM.read(14);
     config.apsauga =   EEPROM.read(15);
 		config.dhcp = 	EEPROM.read(16);
@@ -208,21 +230,25 @@ boolean ReadConfig()
 		config.LED_G = EEPROM.read(27);
 		config.LED_B = EEPROM.read(28);
 
-		config.IP[0] = EEPROM.read(32);
-		config.IP[1] = EEPROM.read(33);
-		config.IP[2] = EEPROM.read(34);
-		config.IP[3] = EEPROM.read(35);
-		config.Netmask[0] = EEPROM.read(36);
-		config.Netmask[1] = EEPROM.read(37);
-		config.Netmask[2] = EEPROM.read(38);
-		config.Netmask[3] = EEPROM.read(39);
-		config.Gateway[0] = EEPROM.read(40);
-		config.Gateway[1] = EEPROM.read(41);
-		config.Gateway[2] = EEPROM.read(42);
-    config.Gateway[3] = EEPROM.read(43);
-    config.intervalas = EEPROM.read(44);
-    config.intervalasEmon = EEPROM.read(48);
-    //laisva nuo 52 adreso
+    config.IP[0] = EEPROM.read(32);
+    config.IP[1] = EEPROM.read(33);
+    config.IP[2] = EEPROM.read(34);
+    config.IP[3] = EEPROM.read(35);
+    config.DNS[0] = EEPROM.read(36);
+    config.DNS[1] = EEPROM.read(37);
+    config.DNS[2] = EEPROM.read(38);
+    config.DNS[3] = EEPROM.read(39);
+		config.Netmask[0] = EEPROM.read(40);
+		config.Netmask[1] = EEPROM.read(41);
+		config.Netmask[2] = EEPROM.read(42);
+		config.Netmask[3] = EEPROM.read(43);
+		config.Gateway[0] = EEPROM.read(44);
+		config.Gateway[1] = EEPROM.read(45);
+		config.Gateway[2] = EEPROM.read(46);
+    config.Gateway[3] = EEPROM.read(47);
+    config.intervalas = EEPROM.read(48);
+    config.intervalasEmon = EEPROM.read(52);
+    //laisva nuo 56 adreso
 		config.ssid = ReadStringFromEEPROM(64);
 		config.password = ReadStringFromEEPROM(96);
 		config.ntpServerName = ReadStringFromEEPROM(128);
@@ -255,13 +281,10 @@ boolean ReadConfig()
 **  NTP 
 **
 */
-const int NTP_PACKET_SIZE = 48; 
+//const int NTP_PACKET_SIZE = 48; 
 byte packetBuffer[ NTP_PACKET_SIZE]; 
 void NTPRefresh()
 {
-
-	
-
 
 	if (WiFi.status() == WL_CONNECTED)
 	{

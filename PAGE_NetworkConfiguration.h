@@ -16,6 +16,7 @@ const char PAGE_NetworkConfiguration[] PROGMEM = R"=====(
 <tr><td align="right">Slaptažodis :</td><td><input type="text" id="password" name="password" value=""></td></tr>
 <tr><td align="right">DHCP :</td><td><input type="checkbox" id="dhcp" name="dhcp"></td></tr>
 <tr><td align="right">Tinklo adresas :</td><td><input type="text" id="ip_0" name="ip_0" size="1">.<input type="text" id="ip_1" name="ip_1" size="1">.<input type="text" id="ip_2" name="ip_2" size="1">.<input type="text" id="ip_3" name="ip_3" value="" size="1"></td></tr>
+<tr><td align="right">DNS adresas :</td><td><input type="text" id="dns_0" name="dns_0" size="1">.<input type="text" id="dns_1" name="dns_1" size="1">.<input type="text" id="dns_2" name="dns_2" size="1">.<input type="text" id="dns_3" name="dns_3" value="" size="1"></td></tr>
 <tr><td align="right">Tinklo kaukė :</td><td><input type="text" id="nm_0" name="nm_0" size="1">.<input type="text" id="nm_1" name="nm_1" size="1">.<input type="text" id="nm_2" name="nm_2" size="1">.<input type="text" id="nm_3" name="nm_3" size="1"></td></tr>
 <tr><td align="right">Tinklų sietuvas :</td><td><input type="text" id="gw_0" name="gw_0" size="1">.<input type="text" id="gw_1" name="gw_1" size="1">.<input type="text" id="gw_2" name="gw_2" size="1">.<input type="text" id="gw_3" name="gw_3" size="1"></td></tr>
 <tr><td colspan="2" align="center">
@@ -68,7 +69,7 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 
 const char PAGE_WaitAndReload[] PROGMEM = R"=====(
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="refresh" content="5; URL=config.html>;
+<meta http-equiv="refresh" content="5; URL=config.html>
 Palaukite....<br>įrašomi nustatymai ir paleidžiama iš naujo.
 )=====";
 
@@ -91,6 +92,10 @@ void send_network_configuration_html()
       if (server.argName(i) == "ip_1") if (checkRange(server.arg(i)))   config.IP[1] =  server.arg(i).toInt();
       if (server.argName(i) == "ip_2") if (checkRange(server.arg(i)))   config.IP[2] =  server.arg(i).toInt();
       if (server.argName(i) == "ip_3") if (checkRange(server.arg(i)))   config.IP[3] =  server.arg(i).toInt();
+      if (server.argName(i) == "dns_0") if (checkRange(server.arg(i)))   config.DNS[0] =  server.arg(i).toInt();
+      if (server.argName(i) == "dns_1") if (checkRange(server.arg(i)))   config.DNS[1] =  server.arg(i).toInt();
+      if (server.argName(i) == "dns_2") if (checkRange(server.arg(i)))   config.DNS[2] =  server.arg(i).toInt();
+      if (server.argName(i) == "dns_3") if (checkRange(server.arg(i)))   config.DNS[3] =  server.arg(i).toInt();
       if (server.argName(i) == "nm_0") if (checkRange(server.arg(i)))   config.Netmask[0] =  server.arg(i).toInt();
       if (server.argName(i) == "nm_1") if (checkRange(server.arg(i)))   config.Netmask[1] =  server.arg(i).toInt();
       if (server.argName(i) == "nm_2") if (checkRange(server.arg(i)))   config.Netmask[2] =  server.arg(i).toInt();
@@ -125,20 +130,24 @@ void send_network_configuration_values_html()
 
   String values ="";
 
-  values += "ssid|" + (String) config.ssid + "|input\n";
-  values += "password|" +  (String) config.password + "|input\n";
+values += "ssid|" + (String) config.ssid + "|input\n";
+values += "password|" +  (String) config.password + "|input\n";
   values += "ip_0|" +  (String) config.IP[0] + "|input\n";
   values += "ip_1|" +  (String) config.IP[1] + "|input\n";
   values += "ip_2|" +  (String) config.IP[2] + "|input\n";
   values += "ip_3|" +  (String) config.IP[3] + "|input\n";
+values += "dns_0|" +  (String) config.DNS[0] + "|input\n";
+values += "dns_1|" +  (String) config.DNS[1] + "|input\n";
+values += "dns_2|" +  (String) config.DNS[2] + "|input\n";
+values += "dns_3|" +  (String) config.DNS[3] + "|input\n";
   values += "nm_0|" +  (String) config.Netmask[0] + "|input\n";
   values += "nm_1|" +  (String) config.Netmask[1] + "|input\n";
   values += "nm_2|" +  (String) config.Netmask[2] + "|input\n";
   values += "nm_3|" +  (String) config.Netmask[3] + "|input\n";
-  values += "gw_0|" +  (String) config.Gateway[0] + "|input\n";
-  values += "gw_1|" +  (String) config.Gateway[1] + "|input\n";
-  values += "gw_2|" +  (String) config.Gateway[2] + "|input\n";
-  values += "gw_3|" +  (String) config.Gateway[3] + "|input\n";
+values += "gw_0|" +  (String) config.Gateway[0] + "|input\n";
+values += "gw_1|" +  (String) config.Gateway[1] + "|input\n";
+values += "gw_2|" +  (String) config.Gateway[2] + "|input\n";
+values += "gw_3|" +  (String) config.Gateway[3] + "|input\n";
   values += "dhcp|" +  (String) (config.dhcp ? "checked" : "") + "|chk\n";
   server.send ( 200, "text/plain", values);
   Serial.println(__FUNCTION__); 
@@ -173,8 +182,7 @@ void send_connection_state_values_html()
    }
   else
     {
-   
-    
+
     Networks = "Rasti tinklai: " +String(n) + "<br>";
     Networks += "<table border='0' cellspacing='0' cellpadding='3'>";
     Networks += "<tr bgcolor='#DDDDDD' ><td><strong>Pavadinimas</strong></td><td><strong>Signalas</strong></td><td><strong>Enc</strong></td><tr>";

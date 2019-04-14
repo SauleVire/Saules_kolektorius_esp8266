@@ -29,6 +29,7 @@
   */
 
 #include <ESP8266WiFi.h>
+#include <NtpClientLib.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -58,6 +59,7 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_Emoncms.h"
 #include "Page_Index.h"
 #include "Page_DS18B20.h"
+#include "Page_RastiDS18B20.h"
 
 
 #define ACCESS_POINT_NAME  "SauleVire_AP"				
@@ -74,12 +76,13 @@ void setup ( void ) {
 	if (!ReadConfig())
 	{
 		// DEFAULT CONFIG
-		config.ssid = "SauleVire  "; //belaidžio tinklo pavadinimas
+		config.ssid = "SauleVire"; //belaidžio tinklo pavadinimas
 		config.password = "SauleVire"; //slaptažodis
 		config.dhcp = true;
-		config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 1;config.IP[3] = 165;
+    config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 21;config.IP[3] = 165;
+    config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 21;config.DNS[3] = 1;
 		config.Netmask[0] = 255;config.Netmask[1] = 255;config.Netmask[2] = 255;config.Netmask[3] = 0;
-		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 1;config.Gateway[3] = 1;
+		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 21;config.Gateway[3] = 1;
 		config.ntpServerName = "lt.pool.ntp.org";
 		config.Update_Time_Via_NTP_Every =  30;
 		config.timezone = +2;
@@ -131,6 +134,7 @@ void setup ( void ) {
   server.on ( "/kolektorius.html", send_KolektoriausKonfiguracija_html ); 
   server.on ( "/emoncms.html", send_Emoncms_html ); 
   server.on ( "/ds18b20.html", Page_DS18B20 ); 
+  server.on ( "/rastids18b20.html", send_RastiDS18B20_html ); 
   server.on ( "/style.css", []() { Serial.println("style.css"); server.send ( 200, "text/plain", PAGE_Style_css );  } );
 	server.on ( "/microajax.js", []() { Serial.println("microajax.js"); server.send ( 200, "text/plain", PAGE_microajax_js );  } );
 	server.on ( "/admin/values", send_network_configuration_values_html );
@@ -139,6 +143,7 @@ void setup ( void ) {
   server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
   server.on ( "/admin/kolektoriusvalues", send_KolektoriausKonfiguracija_values_html );
   server.on ( "/admin/emoncmsvalues", send_Emoncms_values_html );
+  server.on ( "/admin/rastids18b20values", send_RastiDS18B20_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
 	server.on ( "/admin/devicename",     send_devicename_value_html);
 
@@ -164,7 +169,7 @@ void setup ( void ) {
   pinMode(15, OUTPUT);
   digitalWrite(13, HIGH);
   digitalWrite(15, HIGH);
-
+//  timer.setInterval(15000L, KolektoriusT);
 }
 
  
@@ -204,6 +209,8 @@ void loop ( void ) {
 	server.handleClient();
 ///////////// *   START Your Code here    * //////////////////////
 /****************************************************************/
+
+
   // Taimeris nustato laiko intervalus temperatūrų matavimui
   unsigned long currentMillis = millis();
   unsigned long currentMillis1 = millis();
@@ -215,8 +222,8 @@ void loop ( void ) {
     previousMillis = currentMillis;
 
     TemteraturosMatavimas();
-    Siurblys();
-    long t = millis();Apsauga( t );
+    
+    long t = millis();Apsauga( t ); Siurblys();
 //    Serial.print("AdminTimeOutCounter - "); Serial.println(AdminTimeOutCounter);
     Serial.print("\nemoncmsOn - "); Serial.print(config.emoncmsOn);
     Serial.print(", apsauga - "); Serial.print(config.apsauga);
@@ -242,9 +249,10 @@ void loop ( void ) {
 //    machineIOs.SetLeds(noChange, noChange, (((millis() / 125) & 7) != 0) ? On : Off); // 1 Hz blink with 87.5% duty cycle
 //  machine.ModulateSound(((millis() / 63) & 7) == 0); // 2 Hz blink with 12.5% duty cycle (1.984... Hz)
 /****************************************************************/
-///////////// *    Your Code here END   * //////////////////////
 
   MDNS.update();
+//  timer.run();
+///////////// *    Your Code here END   * //////////////////////
 	
 	if (Refresh)  
 	{	Refresh = false;
