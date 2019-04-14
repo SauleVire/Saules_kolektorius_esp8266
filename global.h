@@ -267,6 +267,8 @@ boolean ReadConfig()
     config.reiksme2= ReadStringFromEEPROM(328);
     config.reiksme3= ReadStringFromEEPROM(335);
     config.katalogas= ReadStringFromEEPROM(342);
+    config.apikey= ReadStringFromEEPROM(350);
+    config.emoncmsSrv= ReadStringFromEEPROM(366);
 		return true;
 		
 	}
