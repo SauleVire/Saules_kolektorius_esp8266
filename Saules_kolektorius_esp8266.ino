@@ -28,21 +28,29 @@
  
   */
 
-#include <ESP8266WiFi.h>
+//#if defined(ESP8266)
+#include <ESP8266WiFi.h>          
+//#else
+//#include <WiFi.h>          
+//#endif
 #include <NtpClientLib.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <ESP8266HTTPUpdateServer.h>
+#include "ESP8266HTTPUpdateServer.h"
 #include <Ticker.h>
-#include <EEPROM.h>
+//#include <EEPROM.h>
 #include <WiFiUdp.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <PID_v1.h>
+#include <ESP_EEPROM.h>
+
 #include "helpers.h"
 #include "global.h"
 #include "ds18b20.h"
 #include <SimpleTimer.h>
+
 /*
 Include the HTML, STYLE and Script "Pages"
 */
@@ -61,28 +69,31 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_DS18B20.h"
 #include "Page_RastiDS18B20.h"
 
-
-#define ACCESS_POINT_NAME  "SauleVire_AP"				
-#define ACCESS_POINT_PASSWORD  "" 
-#define AdminTimeOut 100  // Defines the Time in Seconds, when the Admin-Mode will be disabled
+#define Diagnostika 1 // Naudojama tik testavimui
+#define ACCESS_POINT_NAME  "MikroTik"				
+#define ACCESS_POINT_PASSWORD  "labasrytas" 
+#define AdminTimeOut 300  // Defines the Time in Seconds, when the Admin-Mode will be disabled
 SimpleTimer timer;
 const char* host = "SauleVire";
 
 
 void setup ( void ) {
 	EEPROM.begin(512);
+
+#ifdef Diagnostika
 	Serial.begin(115200);
 	Serial.println("Čia SauleVire.lt pradžia\n");
+#endif
 	if (!ReadConfig())
 	{
 		// DEFAULT CONFIG
 		config.ssid = "SauleVire"; //belaidžio tinklo pavadinimas
-		config.password = "SauleVire"; //slaptažodis
+		config.password = ""; //slaptažodis
 		config.dhcp = true;
-    config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 21;config.IP[3] = 165;
-    config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 21;config.DNS[3] = 1;
+    config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 1;config.IP[3] = 165;
+    config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 1;config.DNS[3] = 1;
 		config.Netmask[0] = 255;config.Netmask[1] = 255;config.Netmask[2] = 255;config.Netmask[3] = 0;
-		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 21;config.Gateway[3] = 1;
+		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 1;config.Gateway[3] = 1;
 		config.ntpServerName = "lt.pool.ntp.org";
 		config.Update_Time_Via_NTP_Every =  30;
 		config.timezone = +2;
@@ -94,18 +105,36 @@ void setup ( void ) {
 		config.TurnOffMinute = 0;
 		config.TurnOnHour = 0;
 		config.TurnOnMinute = 0;
-    config.skirtumason = 12;
-    config.skirtumasoff = 7;
-    config.intervalas = 10000;
-    config.apsauga = true;
+/* ********** kintamieji saulės kolektoriui ******************* */
+    config.k_skirtumas = 4;
+    config.k_uzsalimas = true; // 1-įjungta, 0- išjungta , SK apsauga nuo šalčio, pašildymas
+    config.k_nuorinimas = false; //  SK siurblio rankiniam valdymui (nuorinimas)
+    config.k_intervalas = 5; // Numatytas laikas saulės kolektoriaus temperatūros matavimui 10s.
+
     config.reiksme1 = "a";
     config.reiksme2 = "b";
     config.reiksme3 = "c";
     config.katalogas = "d";
-    config.emoncmsOn = true;
-    
+    config.emoncmsOn = false;
+/* ********** kintamieji Boileriui ******************* */
+    config.b_ON_T = 45; // temperatūra boilerio siurbliui įjungti
+    config.b_OFF_T = 65; // temperatūra boilerio siurbliui įšjungti
+    config.Bo_Rankinis_ijungimas = false; // Žymė rankiniam AT siurblio valdymui
+    config.Bo_Termostatas_ON = false; // Žymė rankiniam termostato įjungimui
+    config.Bo_Termostato_busena = false; // Žymė termostato busenai
+/* ********** kintamieji Akumuliacinei talpai ******************* */
+    config.at_ON_T = 90; // temperatūra akumuliacines talpos siurbliui įjungti
+    config.at_OFF_T = 89; // temperatūra akumuliacines talpos siurbliui įšjungti
+    config.At_Rankinis_ijungimas = 0; // Žymė rankiniam AT siurblio valdymui
+/* ********** PID nustatymai ************************************ */    
+    config.Kp = 25;
+    config.Ki = 1.5;
+    config.Kd = 4;
+    config.WindowSize = 160;
 		WriteConfig();
+#ifdef Diagnostika    
 		Serial.println("General config applied");
+#endif   
 	}
 	
 	
@@ -124,19 +153,43 @@ void setup ( void ) {
 
 	server.on ( "/", processIndex  );
 	server.on ( "/admin/filldynamicdata", filldynamicdata );
-	server.on ( "/favicon.ico",   []() { Serial.println("favicon.ico"); server.send ( 200, "text/html", "" );   }  );
-	server.on ( "/admin.html", []() { Serial.println("admin.html"); server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
+	server.on ( "/favicon.ico",   []() { 
+#ifdef Diagnostika	  
+	  Serial.println("favicon.ico"); 
+#endif   
+	  server.send ( 200, "text/html", "" );   }  );
+	server.on ( "/admin.html", []() {
+#ifdef Diagnostika   
+	  Serial.println("admin.html"); 
+#endif 
+	  server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
 	server.on ( "/config.html", send_network_configuration_html );
-	server.on ( "/info.html", []() { Serial.println("info.html"); server.send ( 200, "text/html", PAGE_Information );   }  );
+  server.on ( "/info.html", []() { 
+#ifdef Diagnostika   
+  Serial.println("info.html"); 
+#endif  
+  server.send ( 200, "text/html", PAGE_Information );   }  );
 	server.on ( "/ntp.html", send_NTP_configuration_html  );
 	server.on ( "/general.html", send_general_html  );
-  server.on ( "/example.html", []() {Serial.println("example.html"); server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
+  server.on ( "/example.html", []() {
+#ifdef Diagnostika    
+    Serial.println("example.html"); 
+#endif
+    server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
   server.on ( "/kolektorius.html", send_KolektoriausKonfiguracija_html ); 
   server.on ( "/emoncms.html", send_Emoncms_html ); 
   server.on ( "/ds18b20.html", Page_DS18B20 ); 
-  server.on ( "/rastids18b20.html", send_RastiDS18B20_html ); 
-  server.on ( "/style.css", []() { Serial.println("style.css"); server.send ( 200, "text/plain", PAGE_Style_css );  } );
-	server.on ( "/microajax.js", []() { Serial.println("microajax.js"); server.send ( 200, "text/plain", PAGE_microajax_js );  } );
+  server.on ( "/rastids18b20.html", send_RastiDS18B20_html );
+  server.on ( "/style.css", []() { 
+#ifdef Diagnostika
+    Serial.println("style.css"); 
+#endif
+    server.send ( 200, "text/plain", PAGE_Style_css );  } );
+	server.on ( "/microajax.js", []() { 
+#ifdef Diagnostika
+	  Serial.println("microajax.js"); 
+#endif
+	  server.send ( 200, "text/plain", PAGE_microajax_js );  } );
 	server.on ( "/admin/values", send_network_configuration_values_html );
 	server.on ( "/admin/connectionstate", send_connection_state_values_html );
 	server.on ( "/admin/infovalues", send_information_values_html );
@@ -145,10 +198,12 @@ void setup ( void ) {
   server.on ( "/admin/emoncmsvalues", send_Emoncms_values_html );
   server.on ( "/admin/rastids18b20values", send_RastiDS18B20_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
-	server.on ( "/admin/devicename",     send_devicename_value_html);
+	server.on ( "/admin/devicename", send_devicename_value_html);
 
 	server.onNotFound ( []() { 
+#ifdef Diagnostika
 	  Serial.println("Page Not Found"); 
+#endif
 	  server.send ( 200, "text/html", PAGE_NotFound );   
 	  }  );
 	server.begin();
@@ -156,8 +211,9 @@ void setup ( void ) {
   MDNS.begin(host);
   httpUpdater.setup(&server);
   MDNS.addService("http", "tcp", 80);
+#ifdef Diagnostika
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
-
+#endif
 
 	tkSecond.attach(1,Second_Tick);
 	UDPNTPClient.begin(2390);  // Port for NTP receive
@@ -165,11 +221,16 @@ void setup ( void ) {
 //  Setup DS18b20 temperature sensor
 
   SetupDS18B20();
-  pinMode(13, OUTPUT);
-  pinMode(15, OUTPUT);
-  digitalWrite(13, HIGH);
-  digitalWrite(15, HIGH);
+Setpoint = Boileris + config.k_skirtumas;
+  //tell the PID to range between 0 and the full window size
+  myPID.SetOutputLimits(0, config.WindowSize);
+
+  //turn the PID on
+  myPID.SetMode(AUTOMATIC);
 //  timer.setInterval(15000L, KolektoriusT);
+
+  pinMode(RELAYPIN,OUTPUT);
+
 }
 
  
@@ -198,12 +259,12 @@ void loop ( void ) {
 	{	 Minute_Old = DateTime.minute;
 		 if (config.AutoTurnOn)
 		 { if (DateTime.hour == config.TurnOnHour && DateTime.minute == config.TurnOnMinute)
-			 { Serial.println("SwitchON"); }
+			 { Serial.println("SwitchON"); Laikmatis = true;}
 		 }
 		 Minute_Old = DateTime.minute;
 		 if (config.AutoTurnOff)
 		 { if (DateTime.hour == config.TurnOffHour && DateTime.minute == config.TurnOffMinute)
-			 {Serial.println("SwitchOff"); }
+			 {Serial.println("SwitchOff"); Laikmatis = false;}
 		 }
 	}
 	server.handleClient();
@@ -211,38 +272,54 @@ void loop ( void ) {
 /****************************************************************/
 
 
-  // Taimeris nustato laiko intervalus temperatūrų matavimui
+// Taimeris nustato laiko intervalus temperatūrų matavimui
   unsigned long currentMillis = millis();
   unsigned long currentMillis1 = millis();
 
-  // tikrinama ar jau laikas matuoti temperatūrą
-  if ((unsigned long)(currentMillis - previousMillis) >= config.intervalas * 1000)
-  {// digitalWrite(2, LOW);
-    // įsimenamas paskutinio matavimo laikas
+// tikrinama ar matavimo intervalas ne mažesnis negu 3 sekundės.
+  if (config.k_intervalas < 3 ) config.k_intervalas = 3;
+// tikrinama ar jau laikas matuoti temperatūrą
+  if ((unsigned long)(currentMillis - previousMillis) >= config.k_intervalas * 1000)
+  { // įsimenamas paskutinio matavimo laikas
     previousMillis = currentMillis;
 
     TemteraturosMatavimas();
+// Jei įjungtas nuorinimo režimas arba apsauga nuo užšalimo ir kolektoriaus temperatūra artėja prie 0, įjungiamas siurblys
+    if (config.k_nuorinimas == 1 or ((Kolektorius < 0.68) & (config.k_uzsalimas == 1)))
+          { digitalWrite(RELAYPIN, HIGH); relayState = "ON(užšalimas)";
+       Serial.print("\nSiurblio rele įjungta ON (Nuorinimas, užšalimas)\n");
+       } else {Siurblys();
+//Jei laikas sutampa su laiku, kai kolektoriaus šiluma niekinė, siurblys išjungiamas
+//        if (DateTime.hour == config.TurnOffHour or DateTime.hour == config.TurnOffHour +1 )
+//          { digitalWrite(RELAYPIN, LOW); relayState = "OFF(laikas)";
+//       Serial.print("\nSiurblio rele įjungta OFF (nurodytas išjungimo laikas)\n");
+//       } else {Siurblys();}
+       }
     
-    long t = millis();Apsauga( t ); Siurblys();
-//    Serial.print("AdminTimeOutCounter - "); Serial.println(AdminTimeOutCounter);
-    Serial.print("\nemoncmsOn - "); Serial.print(config.emoncmsOn);
-    Serial.print(", apsauga - "); Serial.print(config.apsauga);
-    Serial.print("\nK- "); Serial.print(Kolektorius);
-    Serial.print(", B- "); Serial.print(Boileris);
-    Serial.print(", O- "); Serial.print(Oras);
-    Serial.printf("\nFreeMem: %d \nDabar- %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap(), DateTime.year, DateTime.month, DateTime.day, DateTime.hour, DateTime.minute, DateTime.second);
 }
-
-    //ar aktyvuotas duomenų siuntimas į emoncms ir jau galima siųsti duomenis
+/* ****************************** emoncms ****************************** */
+// tikrinama ar siuntimo intervalas ne mažesnis negu 5 sekundės.
+if (config.intervalasEmon < 5 ) config.k_intervalas = 5;
+//ar aktyvuotas duomenų siuntimas į emoncms ir jau galima siųsti duomenis
     if ((config.emoncmsOn  == 1) & ((unsigned long)(currentMillis1 - previousMillis1) >= config.intervalasEmon * 1000)) 
     {
       // įsimenamas paskutinio matavimo laikas
       previousMillis1 = currentMillis1;
       emoncms();
     }
-
-
-
+#ifdef Diagnostika
+// tikrinama ar jau laikas matuoti temperatūrą
+  if (millis() - previousMillis2 >= 10000)
+  { // įsimenamas paskutinio matavimo laikas
+    previousMillis2 = millis();
+    Serial.print("\nemoncmsOn - "); Serial.print(config.emoncmsOn);
+    Serial.print(", k_uzsalimas - "); Serial.print(config.k_uzsalimas);
+    Serial.print("\nK- "); Serial.print(Kolektorius);
+    Serial.print(", B- "); Serial.print(Boileris);
+    Serial.print(", O- "); Serial.print(Oras);
+    Serial.printf("\nFreeMem: %d \nDabar- %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap(), DateTime.year, DateTime.month, DateTime.day, DateTime.hour, DateTime.minute, DateTime.second);
+  }
+#endif
 //  if (WiFi.mode(WIFI_STA))
 //    machineIOs.SetLeds(noChange, noChange, (((millis() / 125) & 7) == 0) ? On : Off); // 1 Hz blink with 12.5% duty cycle
 //  else
