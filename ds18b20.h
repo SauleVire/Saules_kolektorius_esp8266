@@ -64,8 +64,6 @@ void SetupDS18B20(){
     Serial.print("Temp C: ");
     Serial.println(tempC);
   }
-  DS18B20.setResolution(Kolektorius_Adr, 12);   // More on resolutions: http://www.homautomation.org/2015/11/17/ds18b20-how-to-change-resolution-9101112-bits/
-
 }
 
 // reads the temp and humidity from the DHT sensor and sets the global variables for both
@@ -73,10 +71,9 @@ void TemteraturosMatavimas() {
   Kolektorius = DS18B20.getTempC(devAddr[config.Kid]);
   Boileris = DS18B20.getTempC(devAddr[config.Bid]);
   Oras = DS18B20.getTempC(devAddr[config.Oid]);
+//float OrasWU = DS18B20.getTempF(devAddr[config.Oid]);
   // Check if any reads failed and exit
   if (Kolektorius == -127 or Kolektorius == 85 or Kolektorius > 127 ) {
-//    if (temp_out != oldTemp_out && temp_out != (85.0) && temp_out != (-127.0)) {
-
     Kolektorius = KolektoriusOld;
     Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  }
     else { KolektoriusOld = Kolektorius;}
@@ -90,52 +87,48 @@ void TemteraturosMatavimas() {
     Oras = OrasOld;
     Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  }
     else { OrasOld = Oras;}
+  DS18B20.requestTemperatures();
+  
 }
 void Siurblys(){
-//  void Siurblys(long laikas){
-  // Relė įjungiama arba išjungiama priklausomai nuo temperatūrų
-  if (Kolektorius > Boileris + config.skirtumason)
-      { digitalWrite(RELAYPIN, LOW); 
-      relayState = "Įjungtas";
-      Serial.print("\nSiurblio rele įjungta ON\n");
-      }
-  else if ((Kolektorius < Boileris + config.skirtumasoff) & (Kolektorius > 0.45))
+  Input = Kolektorius;
+  Setpoint = Boileris + config.k_skirtumas;
+//   PID myPID(&Input, &Output, &Setpoint, config.Kp, config.Ki, config.Kd, DIRECT);   
+//    myPID.SetOutputLimits(0, config.WindowSize);
+     myPID.SetTunings(config.Kp, config.Ki, config.Kd); 
+     myPID.Compute();  
+       if (millis() - windowStartTime > WindowSize)
+  {
+    //time to shift the Relay Window
+    windowStartTime += WindowSize;
+  }
+  Serial.print("\nInput: ");  Serial.print(Input);
+  Serial.print("\nSetpoint: ");  Serial.print(Setpoint);
+  Serial.print("\nOutput: ");  Serial.print(Output);
+  Serial.print("\nconfig.Kp reikšmė: ");  Serial.print(config.Kp);
+  Serial.print("\nwindowStartTime: ");  Serial.print(windowStartTime);
+  Serial.print("\nmill-Wstart: ");  Serial.print((millis() - windowStartTime) / 1000);
+  Serial.print("\nmilliseconds ("); Serial.print((Output * 100.0) / config.WindowSize, 0);  Serial.println("%)");
+  
+  if ((Output < (millis() - windowStartTime) / 1000) ) 
       { digitalWrite(RELAYPIN, HIGH); 
-      relayState = "Išjungtas";
-      Serial.print("\nSiurblio rele įšungta OFF\n");
+      relayState = "Įjungtas";
+       Serial.print("\nSiurblio rele įjungta ON (Siurblio ciklas)\n");
       }
-DS18B20.requestTemperatures();
-  //Take a measurement at a fixed time (durationTemp = 5000ms, 5s)
-//  if( laikas - timer_freezing > REQUEST_freezing ){ 
-//      if ((Kolektorius < 0.33) & (config.apsauga == 1)) {
-//        digitalWrite(RELAYPIN, LOW); }
-//    timer_freezing = millis();  //Remember the last time measurement
-//  }
+  else 
+      { digitalWrite(RELAYPIN, LOW); 
+      relayState = "Išjungtas";
+      Serial.print("\nSiurblio rele išjungta OFF (Siurblio ciklas)\n");
+      }
+ 
 }
 
+     
+  // Tikrinama ar įjungta ir reikalinga k_uzsalimas nuo užšalimo
+void k_uzsalimas(){
+      if (((Kolektorius < 0.25) & (config.k_uzsalimas == 1)) or (config.k_nuorinimas == 1)) {
+        digitalWrite(RELAYPIN, HIGH); 
+        relayState = "Įjungtas";
+        Serial.print("\nSiurblio rele įjungta ON (Apsaugos ciklas)\n");}
 
-
-      
-  // Tikrinama ar įjungta ir reikalinga apsauga nuo užšalimo
-void Apsauga(long now){
-  //Take a measurement at a fixed time (durationTemp = 5000ms, 5s)
-  if( now - timer_freezing > REQUEST_freezing ){ 
-      if ((Kolektorius < 0.33) & (config.apsauga == 1)) {
-        digitalWrite(RELAYPIN, LOW); 
-        relayState = "Įjungtas";}
-    timer_freezing = millis();  //Remember the last time measurement
-  }
-}
-
-/////////////////////////////////////////////////
-void KolektoriusT() {
-  Kolektorius = DS18B20.getTempC(Kolektorius_Adr);   // Stores temp in F. Change getTempF to getTempC for celcius.
- if (Kolektorius == -127 or Kolektorius == 85 or Kolektorius == 127)
-  {    Kolektorius = KolektoriusOld;
-    Serial.print("\nKolektoriusOld- ");Serial.println(KolektoriusOld);
-  }
-  else {  KolektoriusOld = Kolektorius;
-  Serial.print("\nKolektorius- ");Serial.println(Kolektorius);
-  }
-      DS18B20.requestTemperatures();
 }

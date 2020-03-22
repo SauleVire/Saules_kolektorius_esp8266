@@ -21,7 +21,7 @@ String url = "/emoncms9/input/post.json?node=" + String(config.katalogas) + "&js
                "Connection: close\r\n\r\n");
   unsigned long timeout = millis();
   while (client.available() == 0) {
-    if (millis() - timeout > 2000) {
+    if (millis() - timeout > 750) {
       Serial.println(">>> Client Timeout !");
       client.stop();
       return;

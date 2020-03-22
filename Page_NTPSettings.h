@@ -4,7 +4,10 @@ const char PAGE_NTPConfiguration[] PROGMEM = R"=====(
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <div class="smartphone">
   <div class="content">
-<a href="admin.html"  class="btn btn--s"><</a>&nbsp;&nbsp;<strong>NTP nustatymai</strong>
+  <center><a href="admin.html" class="myButton" ><</a>
+<span class="textas"> NTP nustatymai </span>
+<a href="/" class="myButton" >></a>
+
 <hr>
 <form action="" method="get">
 <table border="0"  cellspacing="0" cellpadding="3" >
@@ -49,7 +52,7 @@ const char PAGE_NTPConfiguration[] PROGMEM = R"=====(
 </select>
 </td></tr>
 <tr><td align="right">Dienos šviesos taupymas :</td><td><input type="checkbox" id="dst" name="dst"></td></tr>
-<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Įrašyti"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="myButton" value="Įrašyti"></td></tr>
 </table>
 </form>
 </div></div>

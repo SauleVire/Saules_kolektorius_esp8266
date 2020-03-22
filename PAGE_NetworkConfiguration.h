@@ -8,11 +8,12 @@ const char PAGE_NetworkConfiguration[] PROGMEM = R"=====(
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <div class="smartphone">
   <div class="content">
-<a href="admin.html"  class="btn btn--s"><</a>&nbsp;&nbsp;<strong>Tinklo konfigūracija</strong>
+<center><a href="admin.html"  class="myButton"><</a><span class="textas"> Tinklo konfigūracija </span>
+<a href="info.html"  class="myButton">></a>
 <hr>
 <form action="" method="get">
 <table border="0"  cellspacing="0" cellpadding="3" style="width:300px" >
-<tr><td align="right">SSID:</td><td><input type="text" id="ssid" name="ssid" maxlength="10" value=""></td></tr>
+<tr><td align="right">SSID:</td><td><input type="text" id="ssid" name="ssid" maxlength="15" value=""></td></tr>
 <tr><td align="right">Slaptažodis :</td><td><input type="text" id="password" name="password" value=""></td></tr>
 <tr><td align="right">DHCP :</td><td><input type="checkbox" id="dhcp" name="dhcp"></td></tr>
 <tr><td align="right">Tinklo adresas :</td><td><input type="text" id="ip_0" name="ip_0" size="1">.<input type="text" id="ip_1" name="ip_1" size="1">.<input type="text" id="ip_2" name="ip_2" size="1">.<input type="text" id="ip_3" name="ip_3" value="" size="1"></td></tr>
@@ -20,17 +21,17 @@ const char PAGE_NetworkConfiguration[] PROGMEM = R"=====(
 <tr><td align="right">Tinklo kaukė :</td><td><input type="text" id="nm_0" name="nm_0" size="1">.<input type="text" id="nm_1" name="nm_1" size="1">.<input type="text" id="nm_2" name="nm_2" size="1">.<input type="text" id="nm_3" name="nm_3" size="1"></td></tr>
 <tr><td align="right">Tinklų sietuvas :</td><td><input type="text" id="gw_0" name="gw_0" size="1">.<input type="text" id="gw_1" name="gw_1" size="1">.<input type="text" id="gw_2" name="gw_2" size="1">.<input type="text" id="gw_3" name="gw_3" size="1"></td></tr>
 <tr><td colspan="2" align="center">
-<input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Įrašyti"></td></tr>
+<input type="submit" style="width:150px" class="myButton" value="Įrašyti"></td></tr>
 
 </table>
-</form>
-<!-- <hr> -->
-<strong>Ryšio būsena:&nbsp;&nbsp;</strong><span id="connectionstate">N/A</span><br>
-<!-- <hr> -->
-<strong>Tinklai:</strong><br>
-<table border="0"  cellspacing="3" style="width:310px" >
+</form></center>
+
+<span class="textas">Ryšio būsena:&nbsp;&nbsp;<span id="connectionstate">N/A<br>
+
+Tinklai:</span><br>
+<table border="0"  cellspacing="3" style="width:300px" >
 <tr><td><div id="networks">Nuskaitymas...</div></td></tr>
-<tr><td align="center"><a href="javascript:GetState()" style="width:150px" class="btn btn--m btn--blue">Įkelti iš naujo</a></td></tr>
+<tr><td align="center"><a href="javascript:GetState()" style="width:150px" class="myButton">Įkelti iš naujo</a></td></tr>
 </table>
 
 </div></div>
@@ -47,12 +48,9 @@ function selssid(value)
 
 
 window.onload = function ()
-{
-  load("style.css","css", function() 
-  {
-    load("microajax.js","js", function() 
-    {
-          setValues("/admin/values");
+{  load("style.css","css", function() 
+  {    load("microajax.js","js", function() 
+    {          setValues("/admin/values");
           setTimeout(GetState,3000);
     });
   });
@@ -68,8 +66,9 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 )=====";
 
 const char PAGE_WaitAndReload[] PROGMEM = R"=====(
+<meta http-equiv="refresh" content="5; URL=info.html">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="refresh" content="5; URL=config.html>
+
 Palaukite....<br>įrašomi nustatymai ir paleidžiama iš naujo.
 )=====";
 

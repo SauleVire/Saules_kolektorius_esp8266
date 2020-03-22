@@ -7,8 +7,12 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <div class="smartphone">
   <div class="content">
-<a href="admin.html"  class="btn btn--s"><</a>&nbsp;&nbsp;<strong>Bendroji konfigūracija</strong>
+
+<center><a href="admin.html" class="myButton" ><</a>
+<span class="textas"> Bendroji konfigūracija </span>
+<a href="config.html" class="myButton" >></a>
 <hr>
+<span class="textas">
 <form action="" method="post">
 <table border="0"  cellspacing="0" cellpadding="3" >
 <tr>
@@ -19,12 +23,8 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 <tr>
 	<td align="left" colspan="2"><hr></td>
 </tr>
-
 <tr>
-	<td align="left" colspan="2">Įjunkite:</td>
-</tr>
-<tr>
-	<td align="right"> Aktyvinti:</td>
+	<td align="right"> Aktyvinti įjungimą:</td>
 	<td><input type="checkbox" id="tonenabled" name="tonenabled"></td>
 </tr>
 
@@ -32,21 +32,18 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 	<td align="right"> Laikas:</td>
 	<td><input type="text" id="tonhour" name="tonhour" size="2" value="00">:<input type="text" id="tonminute" name="tonminute" size="2" value="00"></td>
 </tr>
-
-<tr>
-	<td align="left" colspan="2">Išjunkite:</td>
-<tr>
-	<td align="right"> Aktyvinti:</td>
+	<td align="right"> Aktyvinti išjungimą:</td>
 	<td><input type="checkbox" id="toffenabled" name="toffenabled"></td>
 </tr>
 <tr>
 	<td align="right"> Laikas:</td>
 	<td><input type="text" id="toffhour" name="toffhour" size="2" value="00">:<input type="text" id="toffminute" name="toffminute" size="2" value="00"></td>
 </tr>
-<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Įrašyti"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="myButton" value="Įrašyti"></td></tr>
 </table>
 </form>
-</div></div>
+</span>
+</div></div></center>
 <script>
 
  

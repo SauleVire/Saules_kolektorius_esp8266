@@ -7,17 +7,17 @@ const char Page_RastiDS18B20[] PROGMEM = R"=====(
 <link rel="stylesheet" type="text/css" href="/style.css">
 <div class="smartphone">
   <div class="content">
-<center><a href="admin.html"  class="btn btn--s"><</a>
-<strong>DS18B20 nustatymai 1</strong>
-<a href="ds18b20.html"  class="btn btn--s">></a></center>
+<center><a href="admin.html"  class="myButton"><</a><span class="textas"> DS18B20 nustatymai </span>
+<a href="ntp.html"  class="myButton">></a>
+
 <hr>
 <form action="" method="get">
 <table border="0"  cellspacing="0" cellpadding="3" >
 <tr><td align="right">Rasta</td><td>Priskirta</td></tr>
-<tr><td align="right">t1 : <span id="t0"></span></td><td>K: <input type="text" id="Kid" name="Kid" size="5" maxlength="2" value=""></td></tr>
-<tr><td align="right">t2 : <span id="t1"></span></td><td>B: <input type="text" id="Bid" name="Bid" size="5" maxlength="2" value=""></td></tr>
-<tr><td align="right">t3 : <span id="t2"></span></td><td>O: <input type="text" id="Oid" name="Oid" size="5" maxlength="2" value=""></td></tr>
-<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Įrašyti"></td></tr>
+<tr><td align="right">t0 : <span id="t0"></span></td><td>K: <input type="text" id="Kid" name="Kid" size="2" maxlength="2" value=""></td></tr>
+<tr><td align="right">t1 : <span id="t1"></span></td><td>B: <input type="text" id="Bid" name="Bid" size="2" maxlength="2" value=""></td></tr>
+<tr><td align="right">t2 : <span id="t2"></span></td><td>O: <input type="text" id="Oid" name="Oid" size="2" maxlength="2" value=""></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="myButton" value="Įrašyti"></td></tr>
 </table><br><br>
 </form>
 <a href="https://saulevire.lt/emoncms9/dashboard/view/testas?apikey=read">sukaupti duomenys</a>

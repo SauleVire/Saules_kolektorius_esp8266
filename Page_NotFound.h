@@ -9,12 +9,13 @@ const char PAGE_NotFound[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <div class="smartphone">
   <div class="content">
-<strong>Tokio tinklapio čia nėra!</strong>
+<center><a href="admin.html" class="myButton" ><</a>
+<span class="textas"> Tokio tinklapio čia nėra! </span>
+<a href="/" class="myButton" >></a>
+
 <hr>
-<a href="admin.html" style="width:150px" class="btn btn--m btn--blue" >Valdiklio konfigūravimas</a><br>
-//<a href="grafikai.html" style="width:150px" class="btn btn--m btn--blue" >grafikas</a><br>
-//<a href="lentele.html"   style="width:150px"  class="btn btn--m btn--blue" >lentelė</a><br>
-<a href="/"style="width1250px"  class="btn btn--m btn--blue" >Valdiklio būsena</a><br>
+<a href="admin.html" style="width:150px" class="myButton">Valdiklio konfigūravimas</a><br>
+<a href="/"style="width1250px"  class="myButton" >Valdiklio būsena</a><br>
 </div></div>
 
 <script>

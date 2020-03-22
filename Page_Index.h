@@ -8,10 +8,10 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <div class="smartphone">
   <div class="content">
-<center><b>Saulės kolektoriaus valdiklis</center><hr>
+<center><span class="textas">Saulės kolektoriaus valdiklis</span></center><hr>
 <table border="0"  cellspacing="0" cellpadding="3" style="width:300px" >
 <th colspan="2">
-<a href="/admin.html" class="btn btn--s">Valdiklio konfigūravimas</a>
+<a href="/admin.html" class="myButton">Valdiklio konfigūravimas</a>
 <br>
 <b>Dabartinė kolektoriaus būsena</b>
 </th><tr><td>
@@ -21,25 +21,27 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <div align="right">Siurblio būsena :</div>
 <div align="right">Laiko intervelas :</div>
 <div align="right">Apsauga (0- išjungta):</div>
+<div align="right">Nuorinimas (0- išjungta):</div>
 </td><td> 
 <div><span id="K_t"></span>&deg; C</div>
 <div><span id="B_t"></span>&deg; C</div>
 <div><span id="O_t"></span>&deg; C</div> 
 <div><span id="rele"></span></div> 
 <div><span id="laikas"></span> (s)</div> 
-<div><span id="sauga"></span></div> 
+<div><span id="apsauga"></span></div> 
+<div><span id="nuorinimas"></span></div> 
 </td></tr>
-<th colspan=2><a href="/"  class="btn btn--s">Atnaujinti</a></th>
+<th colspan=2><a href="/"  class="myButton">Atnaujinti</a></th>
 </table>
 <hr>
-Dabar : <span id="x_ntp"></span><br>
-Valdiklis veikia <span id="x_ntp2"></span> nuo <span id="x_ntp2"></span><br>
+<span class="textas">Dabar : <span id="x_ntp"></span><br>
+<!-- Valdiklis veikia <span id="x_ntp2"></span> nuo <span id="x_ntp2"></span><br></span> -->
 
 
 
 <p><small><a href=https://saulevire.lt>SauleVire.lt</a> 2019</small></p>
 </div>
-</div>
+</div></center>
 <!-- <div id="K_t">Here comes the Dynamic Data in </div> -->
 <!-- added a DIV, where the dynamic data goes to -->
    <script>                
@@ -68,11 +70,12 @@ void filldynamicdata()
   values += "B_t|" + (String)Boileris +  "|div\n";
   values += "O_t|" + (String)Oras +  "|div\n";
   values += "rele|" + (String)relayState +  "|div\n";
-  values += "laikas|" + (String) config.intervalas  +  "|div\n";
-  values += "sauga|" + (String)config.apsauga +  "|div\n";
+  values += "laikas|" + (String) config.k_intervalas  +  "|div\n";
+  values += "apsauga|" + (String)config.k_uzsalimas +  "|div\n";
+  values += "nuorinimas|" + (String)config.k_nuorinimas +  "|div\n";
   values += "x_ntp|" + (String)DateTime.year + "." + (String)DateTime.month + "." + (String)DateTime.day + " " + (String)DateTime.hour + ":" + (String)DateTime.minute + ":" + (String)DateTime.second + " |div\n";
-values += "x_ntp2|" + (String)(NTP.getTimeDateString (NTP.getFirstSync ()).c_str ())+ " |div\n";
-values += "x_ntp1|" + (String)(NTP.getUptimeString ())+ " |div\n";
+  values += "x_ntp2|" + (String)(NTP.getTimeDateString (NTP.getFirstSync ()).c_str ())+ " |div\n";
+  values += "x_ntp1|" + (String)(NTP.getUptimeString ())+ " |div\n";
     server.send ( 200, "text/plain", values); 
 }
 
