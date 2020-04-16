@@ -1,13 +1,18 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-String FIRMWARE_VERSION = "v1.1";
+
 /* 2019_04_16 19:59 v1.1 Programos naujinimas, pataisyti užšalimo tikrinimo, temperatūrų matavimo algoritmai,
 pridėtas nuorinimas
 
 */ 
 ESP8266WebServer server(80);									// The Webserver
-ESP8266HTTPUpdateServer httpUpdater;
+const char* naujinimas = "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>";
+
+String FIRMWARE_VERSION = "2.6.3";
+const int FW_VERSION = 1244;
+
+//ESP8266HTTPUpdateServer httpUpdater;
 boolean firstStart = true;										// On firststart = true, NTP will try to get a valid time
 int AdminTimeOutCounter = 0;									// Counter for Disabling the AdminMode
 strDateTime DateTime;											// Global DateTime structure, will be refreshed every Second
@@ -234,10 +239,10 @@ void WriteConfig()
   WriteStringToEEPROM(350,config.emoncmsSrv);
   WriteStringToEEPROM(366,config.apikey); //laisva nuo 389
 
-  EEPROM.put(386,config.Kp);
-  EEPROM.put(394,config.Ki);
-  EEPROM.put(402,config.Kd);
-  EEPROM.put(410,config.WindowSize); //laisva nuo 405
+  EEPROM.put(398,config.Kp);
+  EEPROM.put(406,config.Ki);
+  EEPROM.put(414,config.Kd);
+  EEPROM.put(422,config.WindowSize); //laisva nuo 405
 
 	EEPROM.commit();
 }
@@ -299,10 +304,10 @@ boolean ReadConfig()
     config.emoncmsSrv= ReadStringFromEEPROM(350);
     config.apikey = ReadStringFromEEPROM(366);
 
-  EEPROM.get (386,config.Kp);
-  EEPROM.get (394,config.Ki);
-  EEPROM.get (402,config.Kd);
-  EEPROM.get(410,config.WindowSize); //laisva nuo 405
+  EEPROM.get (398,config.Kp);
+  EEPROM.get (406,config.Ki);
+  EEPROM.get (414,config.Kd);
+  EEPROM.get (422,config.WindowSize); //laisva nuo 405
 
 		return true;
 		

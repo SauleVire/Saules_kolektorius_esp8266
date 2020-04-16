@@ -37,7 +37,6 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include "ESP8266HTTPUpdateServer.h"
 #include <Ticker.h>
 //#include <EEPROM.h>
 #include <WiFiUdp.h>
@@ -70,11 +69,11 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_RastiDS18B20.h"
 
 #define Diagnostika 1 // Naudojama tik testavimui
-#define ACCESS_POINT_NAME  "MikroTik"				
-#define ACCESS_POINT_PASSWORD  "labasrytas" 
+#define ACCESS_POINT_NAME  "SauleVire_Ap"				
+#define ACCESS_POINT_PASSWORD  "" 
 #define AdminTimeOut 300  // Defines the Time in Seconds, when the Admin-Mode will be disabled
 SimpleTimer timer;
-const char* host = "SauleVire";
+const char* host = "SauleVire1";
 
 
 void setup ( void ) {
@@ -88,17 +87,17 @@ void setup ( void ) {
 	{
 		// DEFAULT CONFIG
 		config.ssid = "SauleVire"; //belaidžio tinklo pavadinimas
-		config.password = ""; //slaptažodis
+		config.password = "SauleVire.lt"; //slaptažodis
 		config.dhcp = true;
-    config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 1;config.IP[3] = 165;
-    config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 1;config.DNS[3] = 1;
+    config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 2;config.IP[3] = 113;
+    config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 2;config.DNS[3] = 1;
 		config.Netmask[0] = 255;config.Netmask[1] = 255;config.Netmask[2] = 255;config.Netmask[3] = 0;
-		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 1;config.Gateway[3] = 1;
+		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 2;config.Gateway[3] = 1;
 		config.ntpServerName = "lt.pool.ntp.org";
 		config.Update_Time_Via_NTP_Every =  30;
 		config.timezone = +2;
 		config.daylight = true;
-		config.DeviceName = "SauleVire.lt";
+		config.DeviceName = "SauleVire2";
 		config.AutoTurnOff = false;
 		config.AutoTurnOn = false;
 		config.TurnOffHour = 0;
@@ -180,6 +179,41 @@ void setup ( void ) {
   server.on ( "/emoncms.html", send_Emoncms_html ); 
   server.on ( "/ds18b20.html", Page_DS18B20 ); 
   server.on ( "/rastids18b20.html", send_RastiDS18B20_html );
+  server.on("/naujinimas.html", HTTP_GET, []() {
+      server.sendHeader("Connection", "close");
+      server.send(200, "text/html", naujinimas);
+    });
+
+    server.on("/update", HTTP_POST, []() {
+      server.sendHeader("Connection", "close");
+      server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+      ESP.restart();
+    }, []() {
+      HTTPUpload& upload = server.upload();
+      if (upload.status == UPLOAD_FILE_START) {
+        Serial.setDebugOutput(true);
+        WiFiUDP::stopAll();
+        Serial.printf("Update: %s\n", upload.filename.c_str());
+        uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+        if (!Update.begin(maxSketchSpace)) { //start with max available size
+          Update.printError(Serial);
+        }
+      } else if (upload.status == UPLOAD_FILE_WRITE) {
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+          Update.printError(Serial);
+        }
+      } else if (upload.status == UPLOAD_FILE_END) {
+        if (Update.end(true)) { //true to set the size to the current progress
+          Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+        } else {
+          Update.printError(Serial);
+        }
+        Serial.setDebugOutput(false);
+      }
+      yield();
+    });
+
+    
   server.on ( "/style.css", []() { 
 #ifdef Diagnostika
     Serial.println("style.css"); 
@@ -199,7 +233,7 @@ void setup ( void ) {
   server.on ( "/admin/rastids18b20values", send_RastiDS18B20_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
 	server.on ( "/admin/devicename", send_devicename_value_html);
-
+  
 	server.onNotFound ( []() { 
 #ifdef Diagnostika
 	  Serial.println("Page Not Found"); 
@@ -209,7 +243,6 @@ void setup ( void ) {
 	server.begin();
 
   MDNS.begin(host);
-  httpUpdater.setup(&server);
   MDNS.addService("http", "tcp", 80);
 #ifdef Diagnostika
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);

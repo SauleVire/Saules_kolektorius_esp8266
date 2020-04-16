@@ -34,16 +34,13 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <th colspan=2><a href="/"  class="myButton">Atnaujinti</a></th>
 </table>
 <hr>
-<span class="textas">Dabar : <span id="x_ntp"></span><br>
-<!-- Valdiklis veikia <span id="x_ntp2"></span> nuo <span id="x_ntp2"></span><br></span> -->
-
-
-
-<p><small><a href=https://saulevire.lt>SauleVire.lt</a> 2019</small></p>
+<span class="textas">Dabar: <span id="x_ntp"></span><br>
+<!-- Valdiklis veikia <span id="x_ntp2"></span> nuo <span id="x_ntp2"></span><br> -->
+<a href=https://saulevire.lt>SauleVire.lt</a> 2020 </br>
+Mikroprograma: v<span id="versija"></span></span><br>
 </div>
 </div></center>
-<!-- <div id="K_t">Here comes the Dynamic Data in </div> -->
-<!-- added a DIV, where the dynamic data goes to -->
+  
    <script>                
 		window.onload = function ()
 		{	load("style.css","css", function() 
@@ -74,9 +71,11 @@ void filldynamicdata()
   values += "apsauga|" + (String)config.k_uzsalimas +  "|div\n";
   values += "nuorinimas|" + (String)config.k_nuorinimas +  "|div\n";
   values += "x_ntp|" + (String)DateTime.year + "." + (String)DateTime.month + "." + (String)DateTime.day + " " + (String)DateTime.hour + ":" + (String)DateTime.minute + ":" + (String)DateTime.second + " |div\n";
-  values += "x_ntp2|" + (String)(NTP.getTimeDateString (NTP.getFirstSync ()).c_str ())+ " |div\n";
-  values += "x_ntp1|" + (String)(NTP.getUptimeString ())+ " |div\n";
+  values += "versija|" + (String)FIRMWARE_VERSION + " |div\n";
+//values += "x_ntp2|" + (String)(NTP.getTimeDateString (NTP.getFirstSync ()).c_str ())+ " |div\n";
+//values += "x_ntp1|" + (String)(NTP.getUptimeString ())+ " |div\n";
     server.send ( 200, "text/plain", values); 
+    Serial.println(__FUNCTION__); 
 }
 
 void processIndex()

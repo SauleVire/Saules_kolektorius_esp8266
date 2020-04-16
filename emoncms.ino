@@ -11,7 +11,7 @@ void emoncms(){
     return;
   }
 
-String url = "/emoncms9/input/post.json?node=" + String(config.katalogas) + "&json={"+ String(config.reiksme1)+":"+String(Kolektorius)+"," + String(config.reiksme2)+ ":"+String(Boileris)+","+ String(config.reiksme3)+":"+String(Oras)+"}&apikey="+String(config.apikey);
+String url = "/emoncms/input/post.json?node=" + String(config.katalogas) + "&json={"+ String(config.reiksme1)+":"+String(Kolektorius)+"," + String(config.reiksme2)+ ":"+String(Boileris)+","+ String(config.reiksme3)+":"+String(Oras)+"}&apikey="+String(config.apikey);
   Serial.print("Requesting URL: ");
   Serial.println(url);
   
