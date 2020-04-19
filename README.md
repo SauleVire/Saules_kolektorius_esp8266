@@ -1,4 +1,4 @@
-# Saulės kolektorius esp8266
+# Saulės kolektoriaus valdiklis esp8266
 * Arduino esp8266 v2.6.3
 * Arduino IDE 1.8.12
 # Bibliotekos
