@@ -8,7 +8,7 @@ void Page_DS18B20(){
   message += "<div class=\"content\">\n";
   message += "<center><a href=\"admin.html\"  class=\"btn btn--s\"><</a>\n";
   message += "<strong>ds18b20 nustatymai</strong>\n";
-  message += "<a href=\"ntp.html\"  class=\"btn btn--s\">></a></center><hr>\n";
+  message += "<a href=\"emoncms.html\"  class=\"btn btn--s\">></a></center><hr>\n";
   message += "<center>Rasta jutiklių: " + (String)numberOfDevices + "<br>\n";
   message += "<table border=\"1\">\n";
   message += "<tr><td>Jutiklio adresas</td><td>Temperatūra</td><td>Nr.</td></tr>\n";

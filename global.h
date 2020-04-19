@@ -7,6 +7,8 @@ pridėtas nuorinimas
 
 */ 
 ESP8266WebServer server(80);									// The Webserver
+ESP8266HTTPUpdateServer httpUpdater;
+
 const char* naujinimas = "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>";
 
 String FIRMWARE_VERSION = "2.6.3";
@@ -20,9 +22,13 @@ WiFiUDP UDPNTPClient;											// NTP Client
 unsigned long UnixTimestamp = 0;								// GLOBALTIME  ( Will be set by NTP)
 boolean Refresh = false; // For Main Loop, to refresh things like GPIO / WS2812
 int cNTP_Update = 0;											// Counter for Updating the time via NTP
-Ticker tkSecond;												// Second - Timer for Updating Datetime Structure
+// Second - Timer for Updating Datetime Structure
+Ticker tkSecond;	
+// Ticker AdminModeTicker;                 // Admin Mode Configuration status
+
+//gets called when WiFiManager enters configuration mode
 boolean AdminEnabled = true;		// Enable Admin Mode for a given Time
-byte Minute_Old = 240;				// Helpvariable for checking, when a new Minute comes up (for Auto Turn On / Off)
+byte Minute_Old = 180;				// Help variable for checking, when a new Minute comes up (for Auto Turn On / Off)
 
 // Generally, you should use "unsigned long" for variables that hold time to handle rollover
 unsigned long previousMillis = 0;        // will store last temp was read
@@ -166,10 +172,10 @@ void ConfigureWifi()
 {
 	Serial.println("Configuring Wifi");
 	WiFi.begin (config.ssid.c_str(), config.password.c_str());
-  WiFi.hostname("SauleVire");
+  WiFi.hostname("SauleVire.local");
 	if (!config.dhcp)
 	{
-		WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.DNS[0],config.DNS[1],config.DNS[2],config.DNS[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
+	WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.DNS[0],config.DNS[1],config.DNS[2],config.DNS[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
 
   Serial.println("IP adresas: " + WiFi.localIP().toString()+ "\n");
   Serial.print("SSID'as: " + config.ssid+ "\n");
@@ -367,6 +373,8 @@ void NTPRefresh()
 			const unsigned long seventyYears = 2208988800UL;
 			unsigned long epoch = secsSince1900 - seventyYears;
 			UnixTimestamp = epoch;
+  String uptime = NTP.getUptimeString();
+  uptime.replace("days","d.");
 		}
 	}
 }
@@ -393,6 +401,20 @@ void Second_Tick()
 	}
 	Refresh = true;
 }
- 
-
+/* 
+void tick()
+{
+  //toggle state
+  int state = digitalRead(BUILTIN_LED);  // get the current state of GPIO1 pin
+  digitalWrite(BUILTIN_LED, !state);     // set pin to the opposite state
+  // 30 seconds before the end of Admin Mode, start blinking like crazy
+  if (AdminTimeOut - AdminTimeOutCounter >= 30) {
+    AdminModeTicker.attach(0.1, tick);
+  }
+    // when the AdminTimeOutCounter reaches AdminTimeOut value, stop blinking
+  else if ( AdminTimeOutCounter >= AdminTimeOut ) {
+    AdminModeTicker.detach();
+  }
+} 
+*/
 #endif

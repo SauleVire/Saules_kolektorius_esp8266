@@ -94,7 +94,7 @@ long EEPROMReadlong(long address)
 
 void ConvertUnixTimeStamp( unsigned long TimeStamp, struct strDateTime* DateTime)
 {
-		uint8_t year;
+	uint8_t year;
 	uint8_t month, monthLength;
 	uint32_t time;
 	unsigned long days;
@@ -186,5 +186,5 @@ String urldecode(String input) // (based on https://code.google.com/p/avr-netino
 	 }
 	 return ret;
 }
- 
+
 #endif

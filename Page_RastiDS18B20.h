@@ -20,7 +20,7 @@ const char Page_RastiDS18B20[] PROGMEM = R"=====(
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="myButton" value="Įrašyti"></td></tr>
 </table><br><br>
 </form>
-<a href="https://saulevire.lt/emoncms9/dashboard/view/testas?apikey=read">sukaupti duomenys</a>
+
 </div></div>
 <script>
 window.onload = function ()

@@ -43,7 +43,7 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 </table>
 </form>
 </span>
-</div></div></center>
+</div></div>
 <script>
 
  

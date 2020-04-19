@@ -1,32 +1,13 @@
 /* 
   ESP_WebConfig 
-
-  Copyright (c) 2015 John Lassen. All rights reserved.
-  This is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  This software is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
   Latest version: 1.1.3  - 2015-07-20
   Changed the loading of the Javascript and CCS Files, so that they will successively loaded and that only one request goes to the ESP.
-
   -----------------------------------------------------------------------------------------------
-  History
-
-  Version: 1.1.2  - 2015-07-17
-  Added URLDECODE for some input-fields (SSID, PASSWORD...)
-
-  Version  1.1.1 - 2015-07-12
-  First initial version to the public
- 
-  */
+   */
+#define Diagnostika 1 // Naudojama tik testavimui
+#define ACCESS_POINT_NAME  "SauleVire_Ap"        
+#define ACCESS_POINT_PASSWORD  "" 
+#define AdminTimeOut 300  // Defines the Time in Seconds, when the Admin-Mode will be disabled
 
 //#if defined(ESP8266)
 #include <ESP8266WiFi.h>          
@@ -37,6 +18,7 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include <Ticker.h>
 //#include <EEPROM.h>
 #include <WiFiUdp.h>
@@ -48,7 +30,6 @@
 #include "helpers.h"
 #include "global.h"
 #include "ds18b20.h"
-#include <SimpleTimer.h>
 
 /*
 Include the HTML, STYLE and Script "Pages"
@@ -59,7 +40,7 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_Style.css.h"
 #include "Page_NTPsettings.h"
 #include "Page_Information.h"
-#include "Page_General.h"
+//#include "Page_General.h"
 #include "PAGE_NetworkConfiguration.h"
 #include "Page_NotFound.h"
 #include "Page_Kolektorius.h"
@@ -68,17 +49,15 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_DS18B20.h"
 #include "Page_RastiDS18B20.h"
 
-#define Diagnostika 1 // Naudojama tik testavimui
-#define ACCESS_POINT_NAME  "SauleVire_Ap"				
-#define ACCESS_POINT_PASSWORD  "" 
-#define AdminTimeOut 300  // Defines the Time in Seconds, when the Admin-Mode will be disabled
-SimpleTimer timer;
+//SimpleTimer timer;
 const char* host = "SauleVire1";
 
 
-void setup ( void ) {
+void setup ( void ) 
+{
 	EEPROM.begin(512);
-
+//  pinMode(LED_BUILTIN, OUTPUT);
+//  digitalWrite(LED_BUILTIN, LOW);
 #ifdef Diagnostika
 	Serial.begin(115200);
 	Serial.println("Čia SauleVire.lt pradžia\n");
@@ -87,7 +66,7 @@ void setup ( void ) {
 	{
 		// DEFAULT CONFIG
 		config.ssid = "SauleVire"; //belaidžio tinklo pavadinimas
-		config.password = "SauleVire.lt"; //slaptažodis
+		config.password = "SauleVire.lt"; //belaidžio tinklo slaptažodis
 		config.dhcp = true;
     config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 2;config.IP[3] = 113;
     config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 2;config.DNS[3] = 1;
@@ -138,13 +117,16 @@ void setup ( void ) {
 	
 	
 	if (AdminEnabled)
-	{
+	{ 
+    // AdminModeTicker.attach(0.3, tick);
 		WiFi.mode(WIFI_AP_STA);
 		WiFi.softAP( ACCESS_POINT_NAME , ACCESS_POINT_PASSWORD);
+    Serial.print("SauleVire AP IP addresas: "); Serial.println(WiFi.softAPIP());
 	}
 	else
 	{
 		WiFi.mode(WIFI_STA);
+    Serial.print("Valdiklio IP addresas:");Serial.println(WiFi.localIP());
 	}
 
 	ConfigureWifi();
@@ -169,7 +151,7 @@ void setup ( void ) {
 #endif  
   server.send ( 200, "text/html", PAGE_Information );   }  );
 	server.on ( "/ntp.html", send_NTP_configuration_html  );
-	server.on ( "/general.html", send_general_html  );
+//	server.on ( "/general.html", send_general_html  );
   server.on ( "/example.html", []() {
 #ifdef Diagnostika    
     Serial.println("example.html"); 
@@ -181,7 +163,7 @@ void setup ( void ) {
   server.on ( "/rastids18b20.html", send_RastiDS18B20_html );
   server.on("/naujinimas.html", HTTP_GET, []() {
       server.sendHeader("Connection", "close");
-      server.send(200, "text/html", naujinimas);
+//      server.send(200, "text/html", naujinimas);
     });
 
     server.on("/update", HTTP_POST, []() {
@@ -231,8 +213,8 @@ void setup ( void ) {
   server.on ( "/admin/kolektoriusvalues", send_KolektoriausKonfiguracija_values_html );
   server.on ( "/admin/emoncmsvalues", send_Emoncms_values_html );
   server.on ( "/admin/rastids18b20values", send_RastiDS18B20_values_html );
-	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
-	server.on ( "/admin/devicename", send_devicename_value_html);
+//	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
+//	server.on ( "/admin/devicename", send_devicename_value_html);
   
 	server.onNotFound ( []() { 
 #ifdef Diagnostika
@@ -240,16 +222,17 @@ void setup ( void ) {
 #endif
 	  server.send ( 200, "text/html", PAGE_NotFound );   
 	  }  );
-	server.begin();
+	httpUpdater.setup(&server);
+  server.begin();
 
   MDNS.begin(host);
-  MDNS.addService("http", "tcp", 80);
+//  MDNS.addService("http", "tcp", 80);
 #ifdef Diagnostika
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
 #endif
 
 	tkSecond.attach(1,Second_Tick);
-	UDPNTPClient.begin(2390);  // Port for NTP receive
+	UDPNTPClient.begin(2390);  // Port for NTP receivetick
 
 //  Setup DS18b20 temperature sensor
 
@@ -267,37 +250,52 @@ Setpoint = Boileris + config.k_skirtumas;
 }
 
  
-void loop ( void ) {
+void loop ( void ) 
+{
 //  digitalWrite(2, HIGH);
-	if (AdminEnabled) {
-		if (AdminTimeOutCounter > AdminTimeOut) {
+	if (AdminEnabled) 
+	{
+		if (AdminTimeOutCounter > AdminTimeOut) 
+		{
 			 AdminEnabled = false;
+       // AdminModeTicker.detach();
 			 Serial.println("\n\nAdmin Mode disabled!\n\n");
-        WiFi.reconnect();
-        WiFi.mode(WIFI_STA);
-      ConfigureWifi();
-		             }	}
-	if (config.Update_Time_Via_NTP_Every  > 0 ) {
+       WiFi.mode(WIFI_STA);
+       Serial.println(WiFi.localIP());
+
+		 }
+  }
+	if (config.Update_Time_Via_NTP_Every  > 0 ) 
+	{
 		if (cNTP_Update > 5 && firstStart)
-		{	NTPRefresh();
+		{
+      NTPRefresh();
 			cNTP_Update =0;
 			firstStart = false;
 		}
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
-		{	NTPRefresh();
+		{	
+		  NTPRefresh();
 			cNTP_Update =0;
 		}
 	}
 	if(DateTime.minute != Minute_Old)
-	{	 Minute_Old = DateTime.minute;
+	{	 
+	  Minute_Old = DateTime.minute;
 		 if (config.AutoTurnOn)
-		 { if (DateTime.hour == config.TurnOnHour && DateTime.minute == config.TurnOnMinute)
-			 { Serial.println("SwitchON"); Laikmatis = true;}
+		 { 
+		  if (DateTime.hour == config.TurnOnHour && DateTime.minute == config.TurnOnMinute)
+			{ 
+			  Serial.println("SwitchON"); Laikmatis = true;
+			  }
 		 }
 		 Minute_Old = DateTime.minute;
 		 if (config.AutoTurnOff)
-		 { if (DateTime.hour == config.TurnOffHour && DateTime.minute == config.TurnOffMinute)
-			 {Serial.println("SwitchOff"); Laikmatis = false;}
+		 { 
+		  if (DateTime.hour == config.TurnOffHour && DateTime.minute == config.TurnOffMinute)
+			{
+			  Serial.println("SwitchOff"); Laikmatis = false;
+			  }
 		 }
 	}
 	server.handleClient();
@@ -345,6 +343,7 @@ if (config.intervalasEmon < 5 ) config.k_intervalas = 5;
   if (millis() - previousMillis2 >= 10000)
   { // įsimenamas paskutinio matavimo laikas
     previousMillis2 = millis();
+    Serial.print("\nAdminTimeOutCounter- ");Serial.print(AdminTimeOutCounter);
     Serial.print("\nemoncmsOn - "); Serial.print(config.emoncmsOn);
     Serial.print(", k_uzsalimas - "); Serial.print(config.k_uzsalimas);
     Serial.print("\nK- "); Serial.print(Kolektorius);

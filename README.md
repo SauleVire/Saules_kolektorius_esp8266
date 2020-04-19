@@ -1,1 +1,1 @@
-# Saulės_kolektorius_esp8266
+# Saules_kolektorius_esp8266

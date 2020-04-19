@@ -5,7 +5,7 @@ const char PAGE_KolektoriausKonfiguracija[] PROGMEM = R"=====(
 <div class="smartphone">
   <div class="content">
 <center><a href="admin.html"  class="myButton"><</a><span class="textas"> Kolektoriaus nustatymai </span>
-<a href="emoncms.html"  class="myButton">></a>
+<a href="rastids18b20.html"  class="myButton">></a>
 
 <hr>
 <form action="" method="get">
