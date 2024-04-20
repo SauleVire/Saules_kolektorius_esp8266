@@ -43,7 +43,7 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 </table>
 </form>
 </span>
-</div></div>
+</div></div></center>
 <script>
 
  
@@ -69,17 +69,14 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 // Functions for this Page
 void send_devicename_value_html()
 {
-		
 	String values ="";
 	values += "devicename|" + (String) config.DeviceName + "|div\n";
 	server.send ( 200, "text/plain", values);
 	Serial.println(__FUNCTION__); 
-	
 }
 
-void send_general_html()
+void send_General_html()
 {
-	
 	if (server.args() > 0 )  // Save Settings
 	{
 		config.AutoTurnOn = false;
@@ -99,8 +96,6 @@ void send_general_html()
 	}
 	server.send ( 200, "text/html", PAGE_AdminGeneralSettings ); 
 	Serial.println(__FUNCTION__); 
-	
-	
 }
 
 void send_general_configuration_values_html()

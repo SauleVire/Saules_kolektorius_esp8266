@@ -13,7 +13,7 @@ const char PAGE_Information[] PROGMEM = R"=====(
 <div class="smartphone">
   <div class="content">
 <center><a href="admin.html"  class="myButton"><</a><span class="textas"> Tinklo informacija </span>
-<a href="kolektorius.html"  class="myButton">></a>
+<a href="solarcollector.html"  class="myButton">></a>
 <hr>
 <table border="0"  cellspacing="0" cellpadding="3" style="width:300px" >
 <tr><td align="right">SSID :</td><td><span id="x_ssid"></span></td></tr>
@@ -22,15 +22,16 @@ const char PAGE_Information[] PROGMEM = R"=====(
 <tr><td align="right">Tinklo kaukė :</td><td><span id="x_netmask"></span></td></tr>
 <tr><td align="right">Tinklų sietuvas :</td><td><span id="x_gateway"></span></td></tr>
 <tr><td align="right">Mac :</td><td><span id="x_mac"></span></td></tr>
-<tr><td colspan="2"><hr>
-<span class="textas">Dabar: <span id="data"></span><br>
-Valdiklis veikia <span id="veikimoLaikas"></span><br>
-Mikroprograma: v<span id="versija"></span></span></br>
-<a href=https://saulevire.lt>SauleVire.lt</a> 2020
-</td></tr>
+<tr><td colspan="2"><hr></span></td></tr>
+<tr><td align="right">Programos versija :</td><td><span id="x_fw"></span></td></tr>
+
+<tr><td colspan="2"><hr></span></td></tr>
+<tr><td align="right">NTP Laikas :</td><td><span id="x_ntp"></span></td></tr>
+
+
 <tr><td colspan="2" align="center"><a href="javascript:GetState()" class="myButton">Įkelti iš naujo</a></td></tr>
 </table>
-
+</div></div></center>
 <script>
 
 function GetState()
@@ -64,9 +65,8 @@ void send_information_values_html ()
   values += "x_gateway|" +  (String) WiFi.gatewayIP()[0] + "." +  (String) WiFi.gatewayIP()[1] + "." +  (String) WiFi.gatewayIP()[2] + "." + (String) WiFi.gatewayIP()[3] +  "|div\n";
   values += "x_netmask|" +  (String) WiFi.subnetMask()[0] + "." +  (String) WiFi.subnetMask()[1] + "." +  (String) WiFi.subnetMask()[2] + "." + (String) WiFi.subnetMask()[3] +  "|div\n";
   values += "x_mac|" + GetMacAddress() +  "|div\n";
-  values += "data|" + (String)DateTime.year + "." + (String)DateTime.month + "." + (String)DateTime.day + " " + (String)DateTime.hour + ":" + (String)DateTime.minute + ":" + (String)DateTime.second + " |div\n";
-  values += "versija|" + (String)FIRMWARE_VERSION + " |div\n";
-  values += "veikimoLaikas|" + (String)(NTP.getUptimeString ())+ " |div\n";
+  values += "x_fw|" + FIRMWARE_VERSION +  "|div\n";
+  values += "x_ntp|" + (String)   DateTime.year + "." + (String)  DateTime.month + "." + (String)  DateTime.day +  " " +  (String) DateTime.hour + ":" + (String) + DateTime.minute +  ":" + (String)  DateTime.second + " |div\n";
   server.send ( 200, "text/plain", values);
   Serial.println(__FUNCTION__); 
 

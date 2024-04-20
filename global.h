@@ -1,20 +1,33 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-
-/* 2019_04_16 19:59 v1.1 Programos naujinimas, pataisyti užšalimo tikrinimo, temperatūrų matavimo algoritmai,
-pridėtas nuorinimas
-
-*/ 
+	
 ESP8266WebServer server(80);									// The Webserver
-ESP8266HTTPUpdateServer httpUpdater;
-
-const char* naujinimas = "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>";
-
-String FIRMWARE_VERSION = "2.6.3";
+String FIRMWARE_VERSION = "24.04.20";
 const int FW_VERSION = 1244;
+//const char* Naujinimas = "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>";
+const char Naujinimas[] PROGMEM = R"=====(
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<div class="smartphone">
+  <div class="content">
+  <form method='POST' action='/update' enctype='multipart/form-data'>
+  <input type='file' name='update'>
+  <input type='submit' style="width:100px" class="myButton" value='Naujinti'>
+  </form>
+  </div>
+  <script>
+window.onload = function ()
+{	load("style.css","css", function() 
+	{		load("microajax.js","js", function() 
+		{				// Do something after load...
+		});
+	});
+}
+function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,a.type="text/javascript",a.async=!1,a.onload=function(){n()},document.getElementsByTagName("head")[0].appendChild(a)}else if("css"==t){var a=document.createElement("link");a.href=e,a.rel="stylesheet",a.type="text/css",a.async=!1,a.onload=function(){n()},document.getElementsByTagName("head")[0].appendChild(a)}}
+</script>
+)=====";
 
-//ESP8266HTTPUpdateServer httpUpdater;
 boolean firstStart = true;										// On firststart = true, NTP will try to get a valid time
 int AdminTimeOutCounter = 0;									// Counter for Disabling the AdminMode
 strDateTime DateTime;											// Global DateTime structure, will be refreshed every Second
@@ -22,13 +35,9 @@ WiFiUDP UDPNTPClient;											// NTP Client
 unsigned long UnixTimestamp = 0;								// GLOBALTIME  ( Will be set by NTP)
 boolean Refresh = false; // For Main Loop, to refresh things like GPIO / WS2812
 int cNTP_Update = 0;											// Counter for Updating the time via NTP
-// Second - Timer for Updating Datetime Structure
-Ticker tkSecond;	
-// Ticker AdminModeTicker;                 // Admin Mode Configuration status
-
-//gets called when WiFiManager enters configuration mode
+Ticker tkSecond;												// Second - Timer for Updating Datetime Structure
 boolean AdminEnabled = true;		// Enable Admin Mode for a given Time
-byte Minute_Old = 180;				// Help variable for checking, when a new Minute comes up (for Auto Turn On / Off)
+byte Minute_Old = 100;				// Helpvariable for checking, when a new Minute comes up (for Auto Turn On / Off)
 
 // Generally, you should use "unsigned long" for variables that hold time to handle rollover
 unsigned long previousMillis = 0;        // will store last temp was read
@@ -40,7 +49,7 @@ unsigned long previousMillis2 = 0;       // will store last temp was read, emonc
 struct strConfig {
 	String ssid;
 	String password;
-  byte  IP[4];
+	byte  IP[4];
   byte  DNS[4];
 	byte  Netmask[4];
 	byte  Gateway[4];
@@ -106,7 +115,7 @@ int WindowSize;
 
 //------------------------------------------
 //DS18B20
-#define ONE_WIRE_BUS D4 //Pin to which is attached a temperature sensor
+#define ONE_WIRE_BUS 4 //Pin to which is attached a temperature sensor
 #define ONE_WIRE_MAX_DEV 15 //The maximum number of devices
 
 OneWire oneWire(ONE_WIRE_BUS);
@@ -147,22 +156,13 @@ boolean Laikmatis = false;
 /////////////////////////////////////////////////////////////////////////////////
 
 
-#define RELAYPIN D0  // D4
+#define RELAYPIN 0  // D4
 String relayState = "OFF";
 
-#define AtSiurblys D7 // išvadas ak. talpos siurblio junginėjimui, Relė x
-#define BoTermostatas D7 // išvadas boilerio termostatui, Relė x
-#define BoSiurblys D7 // išvadas boilerio siurbliui, Relė x
+#define AtSiurblys 7 // išvadas ak. talpos siurblio junginėjimui, Relė x
+#define BoTermostatas 7 // išvadas boilerio termostatui, Relė x
+#define BoSiurblys 7 // išvadas boilerio siurbliui, Relė x
 
-/*
-**
-** emoncms duomenų siuntimas
-**
-*/
-// viskas konfigūruojama per naršyklę!
-//
-//const char* emoncmshost = "xxx"; //Enter the EmonCMS Server address here
-//const char* apikey = "xxx"; //Enter api key here
 /*
 **
 ** CONFIGURATION HANDLING
@@ -172,15 +172,15 @@ void ConfigureWifi()
 {
 	Serial.println("Configuring Wifi");
 	WiFi.begin (config.ssid.c_str(), config.password.c_str());
-  WiFi.hostname("SauleVire.local");
 	if (!config.dhcp)
 	{
-	WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.DNS[0],config.DNS[1],config.DNS[2],config.DNS[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
-
-  Serial.println("IP adresas: " + WiFi.localIP().toString()+ "\n");
-  Serial.print("SSID'as: " + config.ssid+ "\n");
-  Serial.print("Slaptažodis: " + config.password+ "\n\n");
+		WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
 	}
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(config.ssid.c_str());
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());  
 }
 
 void WriteConfig()
@@ -200,8 +200,8 @@ void WriteConfig()
   EEPROM.write(16,config.dhcp);
 	EEPROM.write(17,config.daylight);
 	
-	EEPROMWritelong(18,config.Update_Time_Via_NTP_Every); // 4 Byte
-	EEPROMWritelong(22,config.timezone);  // 4 Byte
+	EEPROMWritelong(18,config.Update_Time_Via_NTP_Every); // 4 uint8_t
+	EEPROMWritelong(22,config.timezone);  // 4 uint8_t
 
   EEPROM.write(32,config.IP[0]);
   EEPROM.write(33,config.IP[1]);
@@ -252,6 +252,7 @@ void WriteConfig()
 
 	EEPROM.commit();
 }
+
 boolean ReadConfig()
 {
 
@@ -268,8 +269,8 @@ boolean ReadConfig()
 		config.dhcp = 	EEPROM.read(16);
 
 		config.daylight = EEPROM.read(17);
-		config.Update_Time_Via_NTP_Every = EEPROMReadlong(18); // 4 Byte
-		config.timezone = EEPROMReadlong(22); // 4 Byte
+		config.Update_Time_Via_NTP_Every = EEPROMReadlong(18); // 4 uint8_t
+		config.timezone = EEPROMReadlong(22); // 4 uint8_t
 
     config.IP[0] = EEPROM.read(32);
     config.IP[1] = EEPROM.read(33);
@@ -329,10 +330,14 @@ boolean ReadConfig()
 **  NTP 
 **
 */
-//const int NTP_PACKET_SIZE = 48; 
+
+const int NTP_PACKET_SIZE = 48; 
 byte packetBuffer[ NTP_PACKET_SIZE]; 
 void NTPRefresh()
 {
+
+	
+
 
 	if (WiFi.status() == WL_CONNECTED)
 	{
@@ -373,8 +378,6 @@ void NTPRefresh()
 			const unsigned long seventyYears = 2208988800UL;
 			unsigned long epoch = secsSince1900 - seventyYears;
 			UnixTimestamp = epoch;
-  String uptime = NTP.getUptimeString();
-  uptime.replace("days","d.");
 		}
 	}
 }
@@ -401,20 +404,6 @@ void Second_Tick()
 	}
 	Refresh = true;
 }
-/* 
-void tick()
-{
-  //toggle state
-  int state = digitalRead(BUILTIN_LED);  // get the current state of GPIO1 pin
-  digitalWrite(BUILTIN_LED, !state);     // set pin to the opposite state
-  // 30 seconds before the end of Admin Mode, start blinking like crazy
-  if (AdminTimeOut - AdminTimeOutCounter >= 30) {
-    AdminModeTicker.attach(0.1, tick);
-  }
-    // when the AdminTimeOutCounter reaches AdminTimeOut value, stop blinking
-  else if ( AdminTimeOutCounter >= AdminTimeOut ) {
-    AdminModeTicker.detach();
-  }
-} 
-*/
+ 
+
 #endif

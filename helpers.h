@@ -91,10 +91,9 @@ long EEPROMReadlong(long address)
       return ((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
 }
 
-
 void ConvertUnixTimeStamp( unsigned long TimeStamp, struct strDateTime* DateTime)
 {
-	uint8_t year;
+		uint8_t year;
 	uint8_t month, monthLength;
 	uint32_t time;
 	unsigned long days;
@@ -140,6 +139,7 @@ void ConvertUnixTimeStamp( unsigned long TimeStamp, struct strDateTime* DateTime
 	  DateTime->month = month + 1;  // jan is month 1  
 	  DateTime->day = time + 1;     // day of month
 	  DateTime->year += 1970;
+	 
 }
 	
 String GetMacAddress()
@@ -150,6 +150,7 @@ String GetMacAddress()
     sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0],  mac[1], mac[2], mac[3], mac[4], mac[5]);
     return  String(macStr);
 }
+
 // convert a single hex digit character to its integer value (from https://code.google.com/p/avr-netino/)
 unsigned char h2int(char c)
 {
@@ -182,9 +183,11 @@ String urldecode(String input) // (based on https://code.google.com/p/avr-netino
          t++;
          c = (h2int(c) << 4) | h2int(input[t]);
 		 }
+		
 		 ret.concat(c);
 	 }
 	 return ret;
+  
 }
 
 #endif
