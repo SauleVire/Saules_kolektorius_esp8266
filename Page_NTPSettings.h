@@ -88,7 +88,7 @@ void send_NTP_configuration_html()
       if (server.argName(i) == "tz") config.timezone =  server.arg(i).toInt(); 
       if (server.argName(i) == "dst") config.daylight = true; 
     }
-    WriteConfig();
+  memory.updateNow();
     firstStart = true;
   }
   server.send ( 200, "text/html", PAGE_NTPConfiguration ); 

@@ -45,8 +45,9 @@ unsigned long previousMillis1 = 0;       // will store last temp was read, emonc
 unsigned long previousMillis2 = 0;       // will store last temp was read, emoncms write data
  long interval = 20000;              // interval at which to read sensor
 
-
+byte stat; // for memory test
 struct strConfig {
+  String MemTest = "A";
 	String ssid;
 	String password;
 	byte  IP[4];
@@ -107,6 +108,7 @@ int WindowSize;
 
 }   config;
 
+EEManager memory(config);
 /*
 **
 ********* temperatūros jutikliai ds18b20 **************
@@ -184,83 +186,17 @@ void ConfigureWifi()
 }
 
 void WriteConfig()
-{
-
-	Serial.println("Writing Config");
-	EEPROM.write(0,'C');
-	EEPROM.write(1,'F');
-	EEPROM.write(2,'G');
-
-  EEPROM.write(10,config.Kid);
-  EEPROM.write(11,config.Bid);
-  EEPROM.write(12,config.Oid);
-  EEPROM.write(13,config.emoncmsOn);
-  EEPROM.write(14,config.k_nuorinimas);
-  EEPROM.write(15,config.k_uzsalimas);
-  EEPROM.write(16,config.dhcp);
-	EEPROM.write(17,config.daylight);
-	
-	EEPROMWritelong(18,config.Update_Time_Via_NTP_Every); // 4 uint8_t
-	EEPROMWritelong(22,config.timezone);  // 4 uint8_t
-
-  EEPROM.write(32,config.IP[0]);
-  EEPROM.write(33,config.IP[1]);
-  EEPROM.write(34,config.IP[2]);
-  EEPROM.write(35,config.IP[3]);
-
-  EEPROM.write(36,config.DNS[0]);
-  EEPROM.write(37,config.DNS[1]);
-  EEPROM.write(38,config.DNS[2]);
-  EEPROM.write(39,config.DNS[3]);
-
-	EEPROM.write(40,config.Netmask[0]);
-	EEPROM.write(41,config.Netmask[1]);
-	EEPROM.write(42,config.Netmask[2]);
-	EEPROM.write(43,config.Netmask[3]);
-
-	EEPROM.write(44,config.Gateway[0]);
-	EEPROM.write(45,config.Gateway[1]);
-	EEPROM.write(46,config.Gateway[2]);
-  EEPROM.write(47,config.Gateway[3]);
-  EEPROM.write(48,config.k_intervalas); 
-  EEPROM.write(52,config.intervalasEmon); 
-
-	WriteStringToEEPROM(64,config.ssid);
-	WriteStringToEEPROM(96,config.password);
-	WriteStringToEEPROM(128,config.ntpServerName);
-
-  EEPROM.write(292,config.k_skirtumas);
-  EEPROM.write(300,config.AutoTurnOn);
-	EEPROM.write(301,config.AutoTurnOff);
-	EEPROM.write(302,config.TurnOnHour);
-	EEPROM.write(303,config.TurnOnMinute);
-	EEPROM.write(304,config.TurnOffHour);
-	EEPROM.write(305,config.TurnOffMinute);
-	WriteStringToEEPROM(306,config.DeviceName);
-
-  WriteStringToEEPROM(321,config.reiksme1);
-  WriteStringToEEPROM(328,config.reiksme2);
-  WriteStringToEEPROM(335,config.reiksme3);
-  WriteStringToEEPROM(342,config.katalogas);
-  WriteStringToEEPROM(350,config.emoncmsSrv);
-  WriteStringToEEPROM(366,config.apikey); //laisva nuo 389
-
-  EEPROM.put(398,config.Kp);
-  EEPROM.put(406,config.Ki);
-  EEPROM.put(414,config.Kd);
-  EEPROM.put(422,config.WindowSize); //laisva nuo 405
-
-	EEPROM.commit();
+{    memory.update();
 }
 
 boolean ReadConfig()
 {
 
 	Serial.println("Reading Configuration");
-	if (EEPROM.read(0) == 'C' && EEPROM.read(1) == 'F'  && EEPROM.read(2) == 'G' )
+	if (stat == 0)
 	{
 		Serial.println("Configurarion Found!");
-    config.Kid =   EEPROM.read(10);
+/*    config.Kid =   EEPROM.read(10);
     config.Bid =   EEPROM.read(11);
     config.Oid =   EEPROM.read(12);
     config.emoncmsOn =   EEPROM.read(13);
@@ -315,7 +251,7 @@ boolean ReadConfig()
   EEPROM.get (406,config.Ki);
   EEPROM.get (414,config.Kd);
   EEPROM.get (422,config.WindowSize); //laisva nuo 405
-
+*/
 		return true;
 		
 	}

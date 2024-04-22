@@ -48,7 +48,8 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <PID_v2.h>
-#include <ESP_EEPROM.h>
+//#include <ESP_EEPROM.h>
+#include <EEManager.h> 
 #include "helpers.h"
 #include "global.h"
 #include "ds18b20.h"
@@ -82,9 +83,20 @@ const char* host = "SauleVire";
 
 
 void setup ( void ) {
-	EEPROM.begin(512);
+//	EEPROM.begin(512);
+EEPROM.begin(memory.blockSize());
 	Serial.begin(115200);
-	delay(500);
+  stat = memory.begin(0, 'A');
+
+  /*
+    Коды возврата:
+    0 - ключ совпал, данные прочитаны из епром
+    1 - ключ не совпал (первый запуск), данные записаны в епром
+    2 - ошибка, в епроме не хватает места
+  */
+  Serial.println(stat);
+
+delay(500);
 	Serial.println("Starting ES8266");
 	if (!ReadConfig())
 	{

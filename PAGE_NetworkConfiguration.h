@@ -106,7 +106,7 @@ void send_network_configuration_html()
       if (server.argName(i) == "dhcp") config.dhcp = true;
     }
      server.send ( 200, "text/html", PAGE_WaitAndReload );
-    WriteConfig();
+  memory.updateNow();
     ConfigureWifi();
     AdminTimeOutCounter=0;
     

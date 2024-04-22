@@ -72,7 +72,7 @@ void send_Emoncms_html()
       if (server.argName(i) == "intervalasEmon") config.intervalasEmon =  server.arg(i).toInt(); 
       if (server.argName(i) == "emoncmsOn") config.emoncmsOn = true; 
     }
-    WriteConfig();   
+  memory.updateNow();
     firstStart = true;
   }
   server.send ( 200, "text/html", PAGE_Emoncms ); 

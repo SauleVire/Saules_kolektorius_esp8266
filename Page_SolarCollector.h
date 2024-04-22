@@ -73,7 +73,7 @@ void send_SolarCollectorConfig_html()
       if (server.argName(i) == "k_nuorinimas") config.k_nuorinimas = true; 
 
     }
-    WriteConfig();
+    memory.updateNow();
     firstStart = true;
   }
   server.send ( 200, "text/html", PAGE_KolektoriausKonfiguracija ); 

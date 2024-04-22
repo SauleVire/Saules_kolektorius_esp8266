@@ -91,7 +91,7 @@ void send_General_html()
 			if (server.argName(i) == "toffhour") config.TurnOffHour =  server.arg(i).toInt(); 
 			if (server.argName(i) == "toffminute") config.TurnOffMinute =  server.arg(i).toInt(); 
 		}
-		WriteConfig();
+  memory.updateNow();
 		firstStart = true;
 	}
 	server.send ( 200, "text/html", PAGE_AdminGeneralSettings ); 

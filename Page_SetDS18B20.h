@@ -58,7 +58,7 @@ void send_SetDS18B20_html()
       if (server.argName(i) == "Oid") config.Oid = server.arg(i).toInt(); 
     }
     //------------------------------------------------------
-    WriteConfig();   
+  memory.updateNow();
     firstStart = true;
   }
   server.send ( 200, "text/html", Page_SetDS18B20 ); 
