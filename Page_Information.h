@@ -13,7 +13,7 @@ const char PAGE_Information[] PROGMEM = R"=====(
 <div class="smartphone">
   <div class="content">
 <center><a href="admin.html"  class="myButton"><</a><span class="textas"> Tinklo informacija </span>
-<a href="solarcollector.html"  class="myButton">></a>
+<a href="kolektorius.html"  class="myButton">></a>
 <hr>
 <table border="0"  cellspacing="0" cellpadding="3" style="width:300px" >
 <tr><td align="right">SSID :</td><td><span id="x_ssid"></span></td></tr>

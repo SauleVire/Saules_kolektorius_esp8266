@@ -88,11 +88,13 @@ void send_NTP_configuration_html()
       if (server.argName(i) == "tz") config.timezone =  server.arg(i).toInt(); 
       if (server.argName(i) == "dst") config.daylight = true; 
     }
-  memory.updateNow();
+    WriteConfig();
     firstStart = true;
   }
   server.send ( 200, "text/html", PAGE_NTPConfiguration ); 
+  #ifdef Diagnostika   
   Serial.println(__FUNCTION__); 
+  #endif
 }
 
 void send_NTP_configuration_values_html()
@@ -103,5 +105,7 @@ void send_NTP_configuration_values_html()
   values += "tz|" +  (String) config.timezone + "|input\n";
   values += "dst|" +  (String) (config.daylight ? "checked" : "") + "|chk\n";
   server.send ( 200, "text/plain", values);
+  #ifdef Diagnostika   
   Serial.println(__FUNCTION__); 
+  #endif
 }

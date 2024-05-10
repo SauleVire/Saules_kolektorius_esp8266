@@ -25,10 +25,7 @@
 
   Version  1.1.1 - 2015-07-12
   First initial version to the public
-
-
-
-  
+ 
   */
 
 #if defined(ESP8266)
@@ -48,12 +45,13 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <PID_v2.h>
-//#include <ESP_EEPROM.h>
-#include <EEManager.h> 
+#include <ESP_EEPROM.h>
+//#include <EEManager.h> 
 #include "helpers.h"
 #include "global.h"
 #include "ds18b20.h"
 #include <SimpleTimer.h>
+
 /*
 Include the HTML, STYLE and Script "Pages"
 */
@@ -66,60 +64,78 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_General.h"
 #include "PAGE_NetworkConfiguration.h"
 #include "Page_NotFound.h"
-#include "Page_SolarCollector.h"
+#include "Page_Kolektorius.h"
 #include "Page_Emoncms.h"
 #include "Page_Index.h"
-#include "Page_AvailableDS18B20.h"
-#include "Page_SetDS18B20.h"
+#include "Page_DS18B20.h"
+#include "Page_RastiDS18B20.h"
 
-
-#define Diagnostika 1 // Naudojama tik testavimui
-#define ACCESS_POINT_NAME  "SCC"				
+#define Diagnostika 0 // Naudojama tik testavimui
+#define ACCESS_POINT_NAME  "SauleVire_Ap"				
 #define ACCESS_POINT_PASSWORD  "" 
-#define AdminTimeOut 240  // Defines the Time in Seconds, when the Admin-Mode will be diabled
+#define AdminTimeOut 300  // Defines the Time in Seconds, when the Admin-Mode will be disabled
 SimpleTimer timer;
-const char* host = "SauleVire";
-
+const char* host = "SauleVire1";
 
 
 void setup ( void ) {
-//	EEPROM.begin(512);
-EEPROM.begin(memory.blockSize());
+	EEPROM.begin(512);
+
+#ifdef Diagnostika
 	Serial.begin(115200);
-  stat = memory.begin(0, 'A');
-
-  /*
-    Коды возврата:
-    0 - ключ совпал, данные прочитаны из епром
-    1 - ключ не совпал (первый запуск), данные записаны в епром
-    2 - ошибка, в епроме не хватает места
-  */
-  Serial.println(stat);
-
-delay(500);
-	Serial.println("Starting ES8266");
+	Serial.println("Čia SauleVire.lt pradžia\n");
+#endif
 	if (!ReadConfig())
 	{
 		// DEFAULT CONFIG
-		config.ssid = "SauleVire";
-		config.password = "SauleVire";
+		config.ssid = "SauleVire"; //belaidžio tinklo pavadinimas
+		config.password = "SauleVire.lt"; //slaptažodis
 		config.dhcp = true;
-		config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 1;config.IP[3] = 100;
+    config.IP[0] = 192;config.IP[1] = 168;config.IP[2] = 2;config.IP[3] = 113;
+    config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 2;config.DNS[3] = 1;
 		config.Netmask[0] = 255;config.Netmask[1] = 255;config.Netmask[2] = 255;config.Netmask[3] = 0;
-		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 1;config.Gateway[3] = 1;
-		config.ntpServerName = "0.de.pool.ntp.org";
-		config.Update_Time_Via_NTP_Every =  0;
-		config.timezone = -10;
+		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 2;config.Gateway[3] = 1;
+		config.ntpServerName = "lt.pool.ntp.org";
+		config.Update_Time_Via_NTP_Every =  30;
+		config.timezone = +2;
 		config.daylight = true;
-		config.DeviceName = "Not Named";
+		config.DeviceName = "SauleVire2";
 		config.AutoTurnOff = false;
 		config.AutoTurnOn = false;
 		config.TurnOffHour = 0;
 		config.TurnOffMinute = 0;
 		config.TurnOnHour = 0;
 		config.TurnOnMinute = 0;
+/* ********** kintamieji saulės kolektoriui ******************* */
+    config.k_skirtumas = 4;
+    config.k_uzsalimas = true; // 1-įjungta, 0- išjungta , SK apsauga nuo šalčio, pašildymas
+    config.k_nuorinimas = false; //  SK siurblio rankiniam valdymui (nuorinimas)
+    config.k_intervalas = 5; // Numatytas laikas saulės kolektoriaus temperatūros matavimui 10s.
+
+    config.reiksme1 = "a";
+    config.reiksme2 = "b";
+    config.reiksme3 = "c";
+    config.katalogas = "d";
+    config.emoncmsOn = false;
+/* ********** kintamieji Boileriui ******************* */
+    config.b_ON_T = 45; // temperatūra boilerio siurbliui įjungti
+    config.b_OFF_T = 65; // temperatūra boilerio siurbliui įšjungti
+    config.Bo_Rankinis_ijungimas = false; // Žymė rankiniam AT siurblio valdymui
+    config.Bo_Termostatas_ON = false; // Žymė rankiniam termostato įjungimui
+    config.Bo_Termostato_busena = false; // Žymė termostato busenai
+/* ********** kintamieji Akumuliacinei talpai ******************* */
+    config.at_ON_T = 90; // temperatūra akumuliacines talpos siurbliui įjungti
+    config.at_OFF_T = 89; // temperatūra akumuliacines talpos siurbliui įšjungti
+    config.At_Rankinis_ijungimas = 0; // Žymė rankiniam AT siurblio valdymui
+/* ********** PID nustatymai ************************************ */    
+    config.Kp = 25;
+    config.Ki = 1.5;
+    config.Kd = 4;
+    config.WindowSize = 160;
 		WriteConfig();
+#ifdef Diagnostika    
 		Serial.println("General config applied");
+#endif   
 	}
 	
 	
@@ -138,72 +154,96 @@ delay(500);
 
 	server.on ( "/", processIndex  );
 	server.on ( "/admin/filldynamicdata", filldynamicdata );
-	server.on ( "/favicon.ico",   []() { Serial.println("favicon.ico"); server.send ( 200, "text/html", "" );   }  );
-	server.on ( "/admin.html", []() { Serial.println("admin.html"); server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
+	server.on ( "/favicon.ico",   []() { 
+#ifdef Diagnostika	  
+	  Serial.println("favicon.ico"); 
+#endif   
+	  server.send ( 200, "text/html", "" );   }  );
+	server.on ( "/admin.html", []() {
+#ifdef Diagnostika   
+	  Serial.println("admin.html"); 
+#endif 
+	  server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
 	server.on ( "/config.html", send_network_configuration_html );
-	server.on ( "/info.html", []() { Serial.println("info.html"); server.send ( 200, "text/html", PAGE_Information );   }  );
+  server.on ( "/info.html", []() { 
+#ifdef Diagnostika   
+  Serial.println("info.html"); 
+#endif  
+  server.send ( 200, "text/html", PAGE_Information );   }  );
 	server.on ( "/ntp.html", send_NTP_configuration_html  );
-	server.on ( "/general.html", send_General_html  );
-  server.on ( "/solarcollector.html", send_SolarCollectorConfig_html ); 
+	server.on ( "/general.html", send_general_html  );
+  server.on ( "/example.html", []() {
+#ifdef Diagnostika    
+    Serial.println("example.html"); 
+#endif
+    server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
+  server.on ( "/kolektorius.html", send_KolektoriausKonfiguracija_html ); 
   server.on ( "/emoncms.html", send_Emoncms_html ); 
-  server.on ( "/ds18b20.html", Page_AvailableDS18B20 ); 
-  server.on ( "/setds18b20.html", send_SetDS18B20_html );
-  //-------------- OTA update start -------------------------------
-    server.on("/naujinimas.html", HTTP_GET, []() {
+  server.on ( "/ds18b20.html", Page_DS18B20 ); 
+  server.on ( "/rastids18b20.html", send_RastiDS18B20_html );
+  server.on("/naujinimas.html", HTTP_GET, []() {
       server.sendHeader("Connection", "close");
       server.send(200, "text/html", Naujinimas);
     });
-    server.on(
-      "/update", HTTP_POST, []() {
-        server.sendHeader("Connection", "close");
-        server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-        ESP.restart();
-      },
-      []() {
-        HTTPUpload& upload = server.upload();
-        if (upload.status == UPLOAD_FILE_START) {
-          Serial.setDebugOutput(true);
-          WiFiUDP::stopAll();
-          Serial.printf("Update: %s\n", upload.filename.c_str());
-          uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-          if (!Update.begin(maxSketchSpace)) {  // start with max available size
-            Update.printError(Serial);
-          }
-        } else if (upload.status == UPLOAD_FILE_WRITE) {
-          if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-            Update.printError(Serial);
-          }
-        } else if (upload.status == UPLOAD_FILE_END) {
-          if (Update.end(true)) {  // true to set the size to the current progress
-            Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
-          } else {
-            Update.printError(Serial);
-          }
-          Serial.setDebugOutput(false);
+
+    server.on("/update", HTTP_POST, []() {
+      server.sendHeader("Connection", "close");
+      server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+      ESP.restart();
+    }, []() {
+      HTTPUpload& upload = server.upload();
+      if (upload.status == UPLOAD_FILE_START) {
+        Serial.setDebugOutput(true);
+        WiFiUDP::stopAll();
+        Serial.printf("Update: %s\n", upload.filename.c_str());
+        uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+        if (!Update.begin(maxSketchSpace)) { //start with max available size
+          Update.printError(Serial);
         }
-        yield();
-      });
-	  //-------------- OTA update finish -------------------------------
-server.on ( "/style.css", []() { Serial.println("style.css"); server.send ( 200, "text/plain", PAGE_Style_css );  } );
-	server.on ( "/microajax.js", []() { Serial.println("microajax.js"); server.send ( 200, "text/plain", PAGE_microajax_js );  } );
+      } else if (upload.status == UPLOAD_FILE_WRITE) {
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+          Update.printError(Serial);
+        }
+      } else if (upload.status == UPLOAD_FILE_END) {
+        if (Update.end(true)) { //true to set the size to the current progress
+          Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+        } else {
+          Update.printError(Serial);
+        }
+        Serial.setDebugOutput(false);
+      }
+      yield();
+    });
+
+    
+  server.on ( "/style.css", []() { 
+#ifdef Diagnostika
+    Serial.println("style.css"); 
+#endif
+    server.send ( 200, "text/plain", PAGE_Style_css );  } );
+	server.on ( "/microajax.js", []() { 
+#ifdef Diagnostika
+	  Serial.println("microajax.js"); 
+#endif
+	  server.send ( 200, "text/plain", PAGE_microajax_js );  } );
 	server.on ( "/admin/values", send_network_configuration_values_html );
 	server.on ( "/admin/connectionstate", send_connection_state_values_html );
 	server.on ( "/admin/infovalues", send_information_values_html );
-	server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
-  server.on ( "/admin/collectorvalues", send_SolarCollectorConfig_values_html );
+  server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
+  server.on ( "/admin/kolektoriusvalues", send_KolektoriausKonfiguracija_values_html );
   server.on ( "/admin/emoncmsvalues", send_Emoncms_values_html );
-  server.on ( "/admin/setds18b20values", send_SetDS18B20_values_html );
+  server.on ( "/admin/rastids18b20values", send_RastiDS18B20_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
-	server.on ( "/admin/devicename",     send_devicename_value_html);
- 
-
-	server.onNotFound ( []() {
-     Serial.println("Page Not Found"); 
-     server.send ( 400, "text/html", "Page not Found" );   
-     }  );
+	server.on ( "/admin/devicename", send_devicename_value_html);
   
+	server.onNotFound ( []() { 
+#ifdef Diagnostika
+	  Serial.println("Page Not Found"); 
+#endif
+	  server.send ( 200, "text/html", PAGE_NotFound );   
+	  }  );
 	server.begin();
-	Serial.println( "HTTP server started" );
+
   MDNS.begin(host);
   MDNS.addService("http", "tcp", 80);
 #ifdef Diagnostika
@@ -212,6 +252,7 @@ server.on ( "/style.css", []() { Serial.println("style.css"); server.send ( 200,
 
 	tkSecond.attach(1,Second_Tick);
 	UDPNTPClient.begin(2390);  // Port for NTP receive
+
 //  Setup DS18b20 temperature sensor
 
   SetupDS18B20();
@@ -224,56 +265,47 @@ Setpoint = Boileris + config.k_skirtumas;
 //  timer.setInterval(15000L, KolektoriusT);
 
   pinMode(RELAYPIN,OUTPUT);
-
+  digitalWrite(RELAYPIN, LOW);
 }
 
  
 void loop ( void ) {
-	if (AdminEnabled)
-	{
-		if (AdminTimeOutCounter > AdminTimeOut)
-		{
+//  digitalWrite(2, HIGH);
+	if (AdminEnabled) {
+		if (AdminTimeOutCounter > AdminTimeOut) {
 			 AdminEnabled = false;
-			 Serial.println("\nAdmin Mode disabled!");
-			 WiFi.mode(WIFI_STA);
-		}
-	}
-	if (config.Update_Time_Via_NTP_Every  > 0 )
-	{
+			 Serial.println("\n\nAdmin Mode disabled!\n\n");
+        WiFi.reconnect();
+        WiFi.mode(WIFI_STA);
+      ConfigureWifi();
+		             }	}
+	if (config.Update_Time_Via_NTP_Every  > 0 ) {
 		if (cNTP_Update > 5 && firstStart)
-		{
-			NTPRefresh();
+		{	NTPRefresh();
 			cNTP_Update =0;
 			firstStart = false;
 		}
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
-		{
-
-			NTPRefresh();
+		{	NTPRefresh();
 			cNTP_Update =0;
 		}
 	}
-
 	if(DateTime.minute != Minute_Old)
-	{
-		 Minute_Old = DateTime.minute;
+	{	 Minute_Old = DateTime.minute;
 		 if (config.AutoTurnOn)
 		 { if (DateTime.hour == config.TurnOnHour && DateTime.minute == config.TurnOnMinute)
-			 {  Serial.println("SwitchON"); Laikmatis = true;	 }
+			 { Serial.println("SwitchON"); Laikmatis = true;}
 		 }
-
 		 Minute_Old = DateTime.minute;
 		 if (config.AutoTurnOff)
 		 { if (DateTime.hour == config.TurnOffHour && DateTime.minute == config.TurnOffMinute)
-			 {  Serial.println("SwitchOff"); Laikmatis = false;	 }
+			 {Serial.println("SwitchOff"); Laikmatis = false;}
 		 }
 	}
 	server.handleClient();
+///////////// *   START Your Code here    * //////////////////////
+/****************************************************************/
 
-
-	/*
-	*    Your Code here
-	*/
 
 // Taimeris nustato laiko intervalus temperatūrų matavimui
   unsigned long currentMillis = millis();
@@ -333,17 +365,10 @@ if (config.intervalasEmon < 5 ) config.k_intervalas = 5;
   MDNS.update();
 //  timer.run();
 ///////////// *    Your Code here END   * //////////////////////
-
+	
 	if (Refresh)  
-	{
-		Refresh = false;
-		///Serial.println("Refreshing...");
-		 //Serial.printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
+	{	Refresh = false;
+//		Serial.println("Refreshing...");
+//		Serial.printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
 	}
-
-
-
- 
-
-
 }

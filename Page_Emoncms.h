@@ -7,13 +7,14 @@ const char PAGE_Emoncms[] PROGMEM = R"=====(
   <div class="content">
 <center><a href="admin.html" class="myButton" ><</a>
 <span class="textas"> Emoncms nustatymai </span>
-<a href="ds18b20.html" class="myButton" >></a>
+<a href="rastids18b20.html" class="myButton" >></a>
 
 <hr>
 <form action="" method="get">
 <table border="0"  cellspacing="0" cellpadding="3" >
 <tr><td align="right">Serveris :</td><td><input type="text" id="emoncmsSrv" name="emoncmsSrv" size="15" maxlength="15" value=""></td></tr>
 <tr><td align="right">Raktas :</td><td><input type="text" id="apikey" name="apikey" size="15" maxlength="32" value=""></td></tr>
+<tr><td align="right">Reikšmė 0 :</td><td><input type="text" id="reiksme0" name="reiksme0" size="5" maxlength="6" value=""></td></tr>
 <tr><td align="right">Reikšmė 1 :</td><td><input type="text" id="reiksme1" name="reiksme1" size="5" maxlength="6" value=""></td></tr>
 <tr><td align="right">Reikšmė 2 :</td><td><input type="text" id="reiksme2" name="reiksme2" size="5" maxlength="6" value=""></td></tr>
 <tr><td align="right">Reikšmė 3 :</td><td><input type="text" id="reiksme3" name="reiksme3" size="5" maxlength="6" value=""></td></tr>
@@ -25,6 +26,7 @@ const char PAGE_Emoncms[] PROGMEM = R"=====(
 
 </table><br><br>
 </form>
+<a href="https://saulevire.lt/emoncms9/dashboard/view/testas?apikey=read">sukaupti duomenys</a>
 </div></div></center>
 <script>
   
@@ -64,15 +66,16 @@ void send_Emoncms_html()
     for ( uint8_t i = 0; i < server.args(); i++ ) {
       if (server.argName(i) == "emoncmsSrv") config.emoncmsSrv = urldecode( server.arg(i)); 
       if (server.argName(i) == "apikey") config.apikey = urldecode( server.arg(i)); 
+      if (server.argName(i) == "reiksme0") config.reiksme0 = urldecode( server.arg(i)); 
       if (server.argName(i) == "reiksme1") config.reiksme1 = urldecode( server.arg(i)); 
       if (server.argName(i) == "reiksme2") config.reiksme2 = urldecode( server.arg(i)); 
       if (server.argName(i) == "reiksme3") config.reiksme3 = urldecode( server.arg(i)); 
-//      if (server.argName(i) == "reiksme4") config.reiksme4 = urldecode( server.arg(i)); 
+      if (server.argName(i) == "reiksme4") config.reiksme4 = urldecode( server.arg(i)); 
       if (server.argName(i) == "katalogas") config.katalogas = urldecode( server.arg(i)); 
       if (server.argName(i) == "intervalasEmon") config.intervalasEmon =  server.arg(i).toInt(); 
       if (server.argName(i) == "emoncmsOn") config.emoncmsOn = true; 
     }
-  memory.updateNow();
+    WriteConfig();   
     firstStart = true;
   }
   server.send ( 200, "text/html", PAGE_Emoncms ); 
@@ -85,19 +88,21 @@ void send_Emoncms_values_html()
   String values ="";
   values += "emoncmsSrv|" + (String) config.emoncmsSrv + "|input\n";
   values += "apikey|" + (String) config.apikey + "|input\n";
+  values += "reiksme0|" + (String) config.reiksme0 + "|input\n";
   values += "reiksme1|" + (String) config.reiksme1 + "|input\n";
-  values += "reiksme2|" +  (String) config.reiksme2 + "|input\n";
-  values += "reiksme3|" +  (String) config.reiksme3 + "|input\n";
-//  values += "reiksme4|" +  (String) config.reiksme4 + "|input\n";
-  values += "katalogas|" +  (String) config.katalogas + "|input\n";
+  values += "reiksme2|" + (String) config.reiksme2 + "|input\n";
+  values += "reiksme3|" + (String) config.reiksme3 + "|input\n";
+  values += "reiksme4|" + (String) config.reiksme4 + "|input\n";
+  values += "katalogas|" + (String) config.katalogas + "|input\n";
   values += "intervalasEmon|" +  (String) config.intervalasEmon + "|input\n";
   values += "emoncmsOn|" +  (String) (config.emoncmsOn ? "checked" : "") + "|chk\n";
   server.send ( 200, "text/plain", values);
   Serial.println(__FUNCTION__);
+  Serial.print("reiksme0 : ");Serial.println(config.reiksme0); 
   Serial.print("reiksme1 : ");Serial.println(config.reiksme1); 
   Serial.print("reiksme2 : ");Serial.println(config.reiksme2); 
   Serial.print("reiksme3 : ");Serial.println(config.reiksme3); 
-//  Serial.print("reiksme4 : ");Serial.println(config.reiksme4); 
+  Serial.print("reiksme4 : ");Serial.println(config.reiksme4); 
   Serial.print("katalogas : ");Serial.println(config.katalogas); 
   Serial.print("intervalasEmon : ");Serial.println(config.intervalasEmon); 
   Serial.print("emoncmsOn : ");Serial.println(config.emoncmsOn); 

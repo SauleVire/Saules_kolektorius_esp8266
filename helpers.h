@@ -91,6 +91,7 @@ long EEPROMReadlong(long address)
       return ((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
 }
 
+
 void ConvertUnixTimeStamp( unsigned long TimeStamp, struct strDateTime* DateTime)
 {
 		uint8_t year;
@@ -139,7 +140,6 @@ void ConvertUnixTimeStamp( unsigned long TimeStamp, struct strDateTime* DateTime
 	  DateTime->month = month + 1;  // jan is month 1  
 	  DateTime->day = time + 1;     // day of month
 	  DateTime->year += 1970;
-	 
 }
 	
 String GetMacAddress()
@@ -183,11 +183,9 @@ String urldecode(String input) // (based on https://code.google.com/p/avr-netino
          t++;
          c = (h2int(c) << 4) | h2int(input[t]);
 		 }
-		
 		 ret.concat(c);
 	 }
 	 return ret;
-  
 }
-
+ 
 #endif

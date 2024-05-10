@@ -68,6 +68,8 @@ void SetupDS18B20(){
 
 // reads the temp and humidity from the DHT sensor and sets the global variables for both
 void TemteraturosMatavimas() {
+  Siltnamis = DS18B20.getTempC(devAddr[config.Sid]);
+  Rusys = DS18B20.getTempC(devAddr[config.Rid]);
   Kolektorius = DS18B20.getTempC(devAddr[config.Kid]);
   Boileris = DS18B20.getTempC(devAddr[config.Bid]);
   Oras = DS18B20.getTempC(devAddr[config.Oid]);
@@ -75,17 +77,26 @@ void TemteraturosMatavimas() {
   // Check if any reads failed and exit
   if (Kolektorius == -127 or Kolektorius == 85 or Kolektorius > 127 ) {
     Kolektorius = KolektoriusOld;
-    Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  }
+  #ifdef Diagnostika   
+       Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  
+  #endif 
+         }
     else { KolektoriusOld = Kolektorius;}
 
   if (Boileris == -127 or Boileris == 85 or Boileris > 127 ) {
     Boileris = BoilerisOld;
-    Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  }
+  #ifdef Diagnostika   
+       Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  
+  #endif 
+         }
     else { BoilerisOld = Boileris;}
 
   if (Oras == -127 or Oras == 85 or Oras > 127 ) {
     Oras = OrasOld;
-    Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  }
+  #ifdef Diagnostika   
+       Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  
+  #endif 
+         }
     else { OrasOld = Oras;}
   DS18B20.requestTemperatures();
   
@@ -102,6 +113,7 @@ void Siurblys(){
     //time to shift the Relay Window
     windowStartTime += WindowSize;
   }
+#ifdef Diagnostika   
   Serial.print("\nInput: ");  Serial.print(Input);
   Serial.print("\nSetpoint: ");  Serial.print(Setpoint);
   Serial.print("\nOutput: ");  Serial.print(Output);
@@ -109,7 +121,7 @@ void Siurblys(){
   Serial.print("\nwindowStartTime: ");  Serial.print(windowStartTime);
   Serial.print("\nmill-Wstart: ");  Serial.print((millis() - windowStartTime) / 1000);
   Serial.print("\nmilliseconds ("); Serial.print((Output * 100.0) / config.WindowSize, 0);  Serial.println("%)");
-  
+  #endif   
   if ((Output < (millis() - windowStartTime) / 1000) ) 
       { digitalWrite(RELAYPIN, HIGH); 
       relayState = "Įjungtas";
@@ -126,7 +138,7 @@ void Siurblys(){
      
   // Tikrinama ar įjungta ir reikalinga k_uzsalimas nuo užšalimo
 void k_uzsalimas(){
-      if (((Kolektorius < 0.25) & (config.k_uzsalimas == 1)) or (config.k_nuorinimas == 1)) {
+      if (((Kolektorius < 0.85) & (config.k_uzsalimas == 1)) or (config.k_nuorinimas == 1)) {
         digitalWrite(RELAYPIN, HIGH); 
         relayState = "Įjungtas";
         Serial.print("\nSiurblio rele įjungta ON (Apsaugos ciklas)\n");}
