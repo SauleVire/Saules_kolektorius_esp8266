@@ -44,7 +44,6 @@
 #include <WiFiUdp.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <PID_v2.h>
 #include <ESP_EEPROM.h>
 //#include <EEManager.h> 
 #include "helpers.h"
@@ -59,9 +58,9 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_Admin.h"
 #include "Page_Script.js.h"
 #include "Page_Style.css.h"
-#include "Page_NTPsettings.h"
+//#include "Page_NTPsettings.h"
 #include "Page_Information.h"
-#include "Page_General.h"
+//#include "Page_General.h"
 #include "PAGE_NetworkConfiguration.h"
 #include "Page_NotFound.h"
 #include "Page_Kolektorius.h"
@@ -95,38 +94,32 @@ void setup ( void ) {
     config.DNS[0] = 192;config.DNS[1] = 168;config.DNS[2] = 2;config.DNS[3] = 1;
 		config.Netmask[0] = 255;config.Netmask[1] = 255;config.Netmask[2] = 255;config.Netmask[3] = 0;
 		config.Gateway[0] = 192;config.Gateway[1] = 168;config.Gateway[2] = 2;config.Gateway[3] = 1;
-		config.ntpServerName = "lt.pool.ntp.org";
-		config.Update_Time_Via_NTP_Every =  30;
-		config.timezone = 20;
-		config.daylight = true;
-		config.DeviceName = "SauleVire2";
-		config.AutoTurnOff = false;
-		config.AutoTurnOn = false;
-		config.TurnOffHour = 0;
-		config.TurnOffMinute = 0;
-		config.TurnOnHour = 0;
-		config.TurnOnMinute = 0;
+//		config.ntpServerName = "lt.pool.ntp.org";
+//		config.Update_Time_Via_NTP_Every =  30;
+//		config.timezone = +2;
+//		config.daylight = true;
+//		config.DeviceName = "SauleVire2";
+//		config.AutoTurnOff = false;
+//		config.AutoTurnOn = false;
+//		config.TurnOffHour = 0;
+//		config.TurnOffMinute = 0;
+//		config.TurnOnHour = 0;
+//		config.TurnOnMinute = 0;
 /* ********** kintamieji saulės kolektoriui ******************* */
     config.k_skirtumas = 4;
+    config.k_uzsalimo_t = 0.85;
     config.k_uzsalimas = true; // 1-įjungta, 0- išjungta , SK apsauga nuo šalčio, pašildymas
     config.k_nuorinimas = false; //  SK siurblio rankiniam valdymui (nuorinimas)
     config.k_intervalas = 5; // Numatytas laikas saulės kolektoriaus temperatūros matavimui 10s.
 
-    config.reiksme1 = "a";
-    config.reiksme2 = "b";
-    config.reiksme3 = "c";
-    config.katalogas = "d";
+    config.reiksme0 = "a";
+    config.reiksme1 = "b";
+    config.reiksme2 = "c";
+    config.reiksme3 = "d";
+    config.reiksme4 = "e";
+    config.katalogas = "abc";
     config.emoncmsOn = false;
-/* ********** kintamieji Boileriui ******************* */
-//    config.b_ON_T = 45; // temperatūra boilerio siurbliui įjungti
-//    config.b_OFF_T = 65; // temperatūra boilerio siurbliui įšjungti
-//    config.Bo_Rankinis_ijungimas = false; // Žymė rankiniam AT siurblio valdymui
-//    config.Bo_Termostatas_ON = false; // Žymė rankiniam termostato įjungimui
-//    config.Bo_Termostato_busena = false; // Žymė termostato busenai
-/* ********** kintamieji Akumuliacinei talpai ******************* */
-//    config.at_ON_T = 90; // temperatūra akumuliacines talpos siurbliui įjungti
-//    config.at_OFF_T = 89; // temperatūra akumuliacines talpos siurbliui įšjungti
-//    config.At_Rankinis_ijungimas = 0; // Žymė rankiniam AT siurblio valdymui
+
 /* ********** PID nustatymai ************************************ */    
     config.Kp = 25;
     config.Ki = 1.5;
@@ -170,13 +163,13 @@ void setup ( void ) {
   Serial.println("info.html"); 
 #endif  
   server.send ( 200, "text/html", PAGE_Information );   }  );
-	server.on ( "/ntp.html", send_NTP_configuration_html  );
-	server.on ( "/general.html", send_general_html  );
-  server.on ( "/example.html", []() {
-#ifdef Diagnostika    
-    Serial.println("example.html"); 
-#endif
-    server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
+//	server.on ( "/ntp.html", send_NTP_configuration_html  );
+//	server.on ( "/general.html", send_general_html  );
+//  server.on ( "/example.html", []() {
+//#ifdef Diagnostika    
+//    Serial.println("example.html"); 
+//#endif
+//    server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
   server.on ( "/kolektorius.html", send_KolektoriausKonfiguracija_html ); 
   server.on ( "/emoncms.html", send_Emoncms_html ); 
   server.on ( "/ds18b20.html", Page_DS18B20 ); 
@@ -229,12 +222,12 @@ void setup ( void ) {
 	server.on ( "/admin/values", send_network_configuration_values_html );
 	server.on ( "/admin/connectionstate", send_connection_state_values_html );
 	server.on ( "/admin/infovalues", send_information_values_html );
-  server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
+//  server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
   server.on ( "/admin/kolektoriusvalues", send_KolektoriausKonfiguracija_values_html );
   server.on ( "/admin/emoncmsvalues", send_Emoncms_values_html );
   server.on ( "/admin/rastids18b20values", send_RastiDS18B20_values_html );
-	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
-	server.on ( "/admin/devicename", send_devicename_value_html);
+//	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
+//	server.on ( "/admin/devicename", send_devicename_value_html);
   
 	server.onNotFound ( []() { 
 #ifdef Diagnostika
@@ -250,19 +243,12 @@ void setup ( void ) {
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
 #endif
 
-	tkSecond.attach(1,Second_Tick);
-	UDPNTPClient.begin(2390);  // Port for NTP receive
+//	tkSecond.attach(1,Second_Tick);
+//	UDPNTPClient.begin(2390);  // Port for NTP receive
 
 //  Setup DS18b20 temperature sensor
 
   SetupDS18B20();
-Setpoint = Boileris + config.k_skirtumas;
-  //tell the PID to range between 0 and the full window size
-  myPID.SetOutputLimits(0, config.WindowSize);
-
-  //turn the PID on
-  myPID.SetMode(AUTOMATIC);
-//  timer.setInterval(15000L, KolektoriusT);
 
   pinMode(RELAYPIN,OUTPUT);
   digitalWrite(RELAYPIN, LOW);
@@ -279,7 +265,7 @@ void loop ( void ) {
         WiFi.mode(WIFI_STA);
       ConfigureWifi();
 		             }	}
-	if (config.Update_Time_Via_NTP_Every  > 0 ) {
+/*	if (config.Update_Time_Via_NTP_Every  > 0 ) {
 		if (cNTP_Update > 5 && firstStart)
 		{	NTPRefresh();
 			cNTP_Update =0;
@@ -301,7 +287,7 @@ void loop ( void ) {
 		 { if (DateTime.hour == config.TurnOffHour && DateTime.minute == config.TurnOffMinute)
 			 {Serial.println("SwitchOff"); Laikmatis = false;}
 		 }
-	}
+	} */
 	server.handleClient();
 ///////////// *   START Your Code here    * //////////////////////
 /****************************************************************/
@@ -319,18 +305,7 @@ void loop ( void ) {
     previousMillis = currentMillis;
 
     TemteraturosMatavimas();
-// Jei įjungtas nuorinimo režimas arba apsauga nuo užšalimo ir kolektoriaus temperatūra artėja prie 0, įjungiamas siurblys
-    if (config.k_nuorinimas == 1 or ((Kolektorius < 0.68) & (config.k_uzsalimas == 1)))
-          { digitalWrite(RELAYPIN, HIGH); relayState = "ON(užšalimas)";
-       Serial.print("\nSiurblio rele įjungta ON (Nuorinimas, užšalimas)\n");
-       } else {Siurblys();
-//Jei laikas sutampa su laiku, kai kolektoriaus šiluma niekinė, siurblys išjungiamas
-//        if (DateTime.hour == config.TurnOffHour or DateTime.hour == config.TurnOffHour +1 )
-//          { digitalWrite(RELAYPIN, LOW); relayState = "OFF(laikas)";
-//       Serial.print("\nSiurblio rele įjungta OFF (nurodytas išjungimo laikas)\n");
-//       } else {Siurblys();}
-       }
-    
+    Siurblys();
 }
 /* ****************************** emoncms ****************************** */
 // tikrinama ar siuntimo intervalas ne mažesnis negu 5 sekundės.
@@ -352,7 +327,7 @@ if (config.intervalasEmon < 5 ) config.k_intervalas = 5;
     Serial.print("\nK- "); Serial.print(Kolektorius);
     Serial.print(", B- "); Serial.print(Boileris);
     Serial.print(", O- "); Serial.print(Oras);
-    Serial.printf("\nFreeMem: %d \nDabar- %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap(), DateTime.year, DateTime.month, DateTime.day, DateTime.hour, DateTime.minute, DateTime.second);
+//    Serial.printf("\nFreeMem: %d \nDabar- %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap(), DateTime.year, DateTime.month, DateTime.day, DateTime.hour, DateTime.minute, DateTime.second);
   }
 #endif
 //  if (WiFi.mode(WIFI_STA))

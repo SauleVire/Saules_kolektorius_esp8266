@@ -7,8 +7,8 @@ const char Page_RastiDS18B20[] PROGMEM = R"=====(
 <link rel="stylesheet" type="text/css" href="/style.css">
 <div class="smartphone">
   <div class="content">
-<center><a href="admin.html"  class="myButton"><</a><span class="textas"> DS18B20 nustatymai </span>
-<a href="ntp.html"  class="myButton">></a>
+<center><a href="admin.html"  class="myButton"><</a><span class="textas"> Programos Naujinimas </span>
+<a href="naujinimas.html"  class="myButton">></a>
 
 <hr>
 <form action="" method="get">

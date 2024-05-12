@@ -15,12 +15,14 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <br>
 <b>Dabartinė kolektoriaus būsena</b>
 </th><tr><td>
-<div align="right">Siltnamis :</div>
+<div align="right">Šiltnamis :</div>
 <div align="right">Rusys :</div>
 <div align="right">Oras :</div><hr>
 <div align="right">Kolektorius :</div>
-<div align="right">Boileris :</div><hr>
-
+<div align="right">Boileris :</div>
+<hr>
+<div align="right">Skirtumas :</div>
+<div align="right">Užšalimo t :</div>
 <div align="right">Siurblio būsena :</div>
 <div align="right">Laiko intervelas :</div>
 <div align="right">Apsauga (0- išjungta):</div>
@@ -30,8 +32,11 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <div><span id="R_t"></span>&deg; C</div> 
 <div><span id="O_t"></span>&deg; C</div><hr> 
 <div><span id="K_t"></span>&deg; C</div>
-<div><span id="B_t"></span>&deg; C</div><hr>
+<div><span id="B_t"></span>&deg; C</div>
+<hr>
 
+<div><span id="k_skirtumas"></span> &deg; C</div> 
+<div><span id="k_uzsalimo_t"></span> &deg; C</div> 
 <div><span id="rele"></span></div> 
 <div><span id="laikas"></span> (s)</div> 
 <div><span id="apsauga"></span></div> 
@@ -40,9 +45,10 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <th colspan=2><a href="/"  class="myButton">Atnaujinti</a></th>
 </table>
 <hr>
-<span class="textas">Dabar: <span id="x_ntp"></span><br>
+<span class="textas">
+<!-- Dabar: <span id="x_ntp"></span><br> -->
 <!-- Valdiklis veikia <span id="x_ntp2"></span> nuo <span id="x_ntp2"></span><br> -->
-<a href=https://saulevire.lt>SauleVire.lt</a> 2020 </br>
+<a href=https://saulevire.lt>SauleVire.lt</a> 2024 </br>
 Mikroprograma: v<span id="versija"></span></span><br>
 </div>
 </div></center>
@@ -71,14 +77,16 @@ void filldynamicdata()
     String values ="";
   values += "S_t|" + (String)Siltnamis +  "|div\n";
   values += "R_t|" + (String)Rusys +  "|div\n";
-  values += "O_t|" + (String)Kolektorius +  "|div\n";
-  values += "K_t|" + (String)Boileris +  "|div\n";
-  values += "B_t|" + (String)Oras +  "|div\n";
+  values += "O_t|" + (String)Oras +  "|div\n";
+  values += "K_t|" + (String)Kolektorius +  "|div\n";
+  values += "B_t|" + (String)Boileris +  "|div\n";
+  values += "k_skirtumas|" + (String)config.k_skirtumas  +  "|div\n";
+  values += "k_uzsalimo_t|" + (String)config.k_uzsalimo_t  +  "|div\n";
   values += "rele|" + (String)relayState +  "|div\n";
   values += "laikas|" + (String) config.k_intervalas  +  "|div\n";
   values += "apsauga|" + (String)config.k_uzsalimas +  "|div\n";
   values += "nuorinimas|" + (String)config.k_nuorinimas +  "|div\n";
-  values += "x_ntp|" + (String)DateTime.year + "." + (String)DateTime.month + "." + (String)DateTime.day + " " + (String)DateTime.hour + ":" + (String)DateTime.minute + ":" + (String)DateTime.second + " |div\n";
+//  values += "x_ntp|" + (String)DateTime.year + "." + (String)DateTime.month + "." + (String)DateTime.day + " " + (String)DateTime.hour + ":" + (String)DateTime.minute + ":" + (String)DateTime.second + " |div\n";
   values += "versija|" + (String)FIRMWARE_VERSION + " |div\n";
 //values += "x_ntp2|" + (String)(NTP.getTimeDateString (NTP.getFirstSync ()).c_str ())+ " |div\n";
 //values += "x_ntp1|" + (String)(NTP.getUptimeString ())+ " |div\n";

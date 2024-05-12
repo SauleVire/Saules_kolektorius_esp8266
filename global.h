@@ -19,6 +19,9 @@ const char Naujinimas[] PROGMEM = R"=====(
   <input type='submit' style="width:100px" class="myButton" value='Naujinti'>
   </form>
   <div id='prg'>progress: 0%</div>
+  <hr>
+<center><a href="admin.html" style="width:150px" class="myButton">Valdiklio konfigūravimas</a><br>
+<a href="/"style="width1250px"  class="myButton" >Valdiklio būsena</a></center>
   </div>
   <script>
 window.onload = function ()
@@ -112,7 +115,8 @@ struct strConfig {
 	byte LED_B;
 /* ********** kintamieji saulės kolektoriui ******************* */
  float k_skirtumas;
- long k_intervalas;
+ float k_uzsalimo_t;
+ int k_intervalas;
  boolean k_uzsalimas;
  boolean k_nuorinimas;
 
@@ -124,7 +128,7 @@ struct strConfig {
   String reiksme3;
   String reiksme4;
   String katalogas;
-  long intervalasEmon;
+  int intervalasEmon;
   boolean emoncmsOn;
   byte Sid;
   byte Rid;
@@ -280,13 +284,14 @@ void WriteConfig()
 	EEPROM.write(46,config.Gateway[2]);
   EEPROM.write(47,config.Gateway[3]);
   EEPROM.write(48,config.k_intervalas); 
-  EEPROM.write(52,config.intervalasEmon); 
+  EEPROM.write(49,config.intervalasEmon); 
 
 	WriteStringToEEPROM(64,config.ssid);
 	WriteStringToEEPROM(96,config.password);
 	WriteStringToEEPROM(128,config.ntpServerName);
 
-  EEPROM.write(292,config.k_skirtumas);
+  EEPROM.put(292,config.k_skirtumas);
+  EEPROM.put(296,config.k_uzsalimo_t);
   EEPROM.write(300,config.AutoTurnOn);
 	EEPROM.write(301,config.AutoTurnOff);
 	EEPROM.write(302,config.TurnOnHour);
@@ -295,9 +300,11 @@ void WriteConfig()
 	EEPROM.write(305,config.TurnOffMinute);
 	WriteStringToEEPROM(306,config.DeviceName);
 
-  WriteStringToEEPROM(321,config.reiksme1);
-  WriteStringToEEPROM(328,config.reiksme2);
-  WriteStringToEEPROM(335,config.reiksme3);
+  WriteStringToEEPROM(321,config.reiksme0);
+  WriteStringToEEPROM(325,config.reiksme1);
+  WriteStringToEEPROM(329,config.reiksme2);
+  WriteStringToEEPROM(334,config.reiksme3);
+  WriteStringToEEPROM(338,config.reiksme4);
   WriteStringToEEPROM(342,config.katalogas);
   WriteStringToEEPROM(350,config.emoncmsSrv);
   WriteStringToEEPROM(366,config.apikey); //laisva nuo 389
@@ -347,13 +354,14 @@ boolean ReadConfig()
 		config.Gateway[2] = EEPROM.read(46);
     config.Gateway[3] = EEPROM.read(47);
     config.k_intervalas = EEPROM.read(48);
-    config.intervalasEmon = EEPROM.read(52);
+    config.intervalasEmon = EEPROM.read(49);
     //laisva nuo 56 adreso
 		config.ssid = ReadStringFromEEPROM(64);
 		config.password = ReadStringFromEEPROM(96);
 		config.ntpServerName = ReadStringFromEEPROM(128);
-		
-    config.k_skirtumas = EEPROM.read(292);
+		EEPROM.get (398,config.Kp);
+    EEPROM.get (292,config.k_skirtumas);
+    EEPROM.get (296,config.k_uzsalimo_t);
 		config.AutoTurnOn = EEPROM.read(300);
 		config.AutoTurnOff = EEPROM.read(301);
 		config.TurnOnHour = EEPROM.read(302);
@@ -361,10 +369,12 @@ boolean ReadConfig()
 		config.TurnOffHour = EEPROM.read(304);
 		config.TurnOffMinute = EEPROM.read(305);
     config.DeviceName= ReadStringFromEEPROM(306);
-    
-    config.reiksme1= ReadStringFromEEPROM(321);
-    config.reiksme2= ReadStringFromEEPROM(328);
-    config.reiksme3= ReadStringFromEEPROM(335);
+
+    config.reiksme0= ReadStringFromEEPROM(321);
+    config.reiksme1= ReadStringFromEEPROM(325);
+    config.reiksme2= ReadStringFromEEPROM(329);
+    config.reiksme3= ReadStringFromEEPROM(334);
+    config.reiksme4= ReadStringFromEEPROM(338);
     config.katalogas= ReadStringFromEEPROM(342);
     config.emoncmsSrv= ReadStringFromEEPROM(350);
     config.apikey = ReadStringFromEEPROM(366);

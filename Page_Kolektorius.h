@@ -11,6 +11,7 @@ const char PAGE_KolektoriausKonfiguracija[] PROGMEM = R"=====(
 <form action="" method="get">
 <table border="0"  cellspacing="0" cellpadding="3" >
 <tr><td align="right">Skirtumas (°C) :</td><td><input type="text" id="k_skirtumas" name="k_skirtumas" min="1" max="30" size="3" maxlength="4" value=""></td></tr>
+<tr><td align="right">Užšalimo t(°C) :</td><td><input type="text" id="k_uzsalimo_t" name="k_uzsalimo_t" min="1" max="30" size="3" maxlength="4" value=""></td></tr>
 <tr><td align="right">Laiko intervalas (s) :</td><td><input type="text" id="k_intervalas" name="k_intervalas" min="1" max="600" size="3" maxlength="3" value=""></td></tr>
 <tr><td align="right">Apsauga nuo užšalimo :</td><td><input type="checkbox" id="k_uzsalimas" name="k_uzsalimas"></td></tr>
 <tr><td align="right">Nuorinimas :</td><td><input type="checkbox" id="k_nuorinimas" name="k_nuorinimas"></td></tr>
@@ -65,6 +66,7 @@ void send_KolektoriausKonfiguracija_html()
     for ( uint8_t i = 0; i < server.args(); i++ ) {
       if (server.argName(i) == "k_skirtumas") config.k_skirtumas = server.arg(i).toFloat();
       if (server.argName(i) == "k_intervalas") config.k_intervalas =  server.arg(i).toInt(); 
+      if (server.argName(i) == "k_uzsalimo_t") config.k_uzsalimo_t =  server.arg(i).toFloat();
       if (server.argName(i) == "Kp") config.Kp = server.arg(i).toFloat();
       if (server.argName(i) == "Ki") config.Ki = server.arg(i).toFloat();
       if (server.argName(i) == "Kd") config.Kd = server.arg(i).toFloat();
@@ -86,6 +88,7 @@ void send_KolektoriausKonfiguracija_values_html()
   String values ="";
   values += "k_skirtumas|" +  (String) config.k_skirtumas + "|input\n";
   values += "k_intervalas|" +  (String) config.k_intervalas + "|input\n";
+  values += "k_uzsalimo_t|" +  (String) config.k_uzsalimo_t + "|input\n";
   values += "Kp|" + (String) config.Kp + "|input\n";
   values += "Ki|" + (String) config.Ki + "|input\n";
   values += "Kd|" + (String) config.Kd + "|input\n";
@@ -99,6 +102,7 @@ void send_KolektoriausKonfiguracija_values_html()
   Serial.print("k_uzsalimas : ");Serial.println(config.k_uzsalimas); 
   Serial.print("k_nuorinimass : ");Serial.println(config.k_nuorinimas); 
   Serial.print("k_intervalas : ");Serial.println(config.k_intervalas); 
+  Serial.print("k_uzsalimo_t : ");Serial.println(config.k_uzsalimo_t); 
   Serial.print("k_skirtumas : ");Serial.println(config.k_skirtumas); 
   Serial.print("Kp : ");Serial.println(config.Kp); 
   Serial.print("Ki : ");Serial.println(config.Ki); 
