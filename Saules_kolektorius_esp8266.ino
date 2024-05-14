@@ -44,14 +44,14 @@
 #include <WiFiUdp.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <PID_v2.h>
+#include "GyverRelay.h"
 #include <ESP_EEPROM.h>
 //#include <EEManager.h> 
 #include "helpers.h"
 #include "global.h"
 #include "ds18b20.h"
 #include <SimpleTimer.h>
-
+GyverRelay regulator(NORMAL);
 /*
 Include the HTML, STYLE and Script "Pages"
 */
@@ -109,6 +109,7 @@ void setup ( void ) {
 /* ********** kintamieji saulės kolektoriui ******************* */
     config.k_skirtumas = 4;
     config.k_uzsalimas = true; // 1-įjungta, 0- išjungta , SK apsauga nuo šalčio, pašildymas
+    config.k_uzsalimo_t = 0.85; // SK apsauga nuo šalčio, pašildymas, jei atšąla iki 0.85
     config.k_nuorinimas = false; //  SK siurblio rankiniam valdymui (nuorinimas)
     config.k_intervalas = 5; // Numatytas laikas saulės kolektoriaus temperatūros matavimui 10s.
 
@@ -118,15 +119,15 @@ void setup ( void ) {
     config.katalogas = "d";
     config.emoncmsOn = false;
 /* ********** kintamieji Boileriui ******************* */
-//    config.b_ON_T = 45; // temperatūra boilerio siurbliui įjungti
-//    config.b_OFF_T = 65; // temperatūra boilerio siurbliui įšjungti
-//    config.Bo_Rankinis_ijungimas = false; // Žymė rankiniam AT siurblio valdymui
-//    config.Bo_Termostatas_ON = false; // Žymė rankiniam termostato įjungimui
-//    config.Bo_Termostato_busena = false; // Žymė termostato busenai
+    config.b_ON_T = 45; // temperatūra boilerio siurbliui įjungti
+    config.b_OFF_T = 65; // temperatūra boilerio siurbliui įšjungti
+    config.Bo_Rankinis_ijungimas = false; // Žymė rankiniam AT siurblio valdymui
+    config.Bo_Termostatas_ON = false; // Žymė rankiniam termostato įjungimui
+    config.Bo_Termostato_busena = false; // Žymė termostato busenai
 /* ********** kintamieji Akumuliacinei talpai ******************* */
-//    config.at_ON_T = 90; // temperatūra akumuliacines talpos siurbliui įjungti
-//    config.at_OFF_T = 89; // temperatūra akumuliacines talpos siurbliui įšjungti
-//    config.At_Rankinis_ijungimas = 0; // Žymė rankiniam AT siurblio valdymui
+    config.at_ON_T = 90; // temperatūra akumuliacines talpos siurbliui įjungti
+    config.at_OFF_T = 89; // temperatūra akumuliacines talpos siurbliui įšjungti
+    config.At_Rankinis_ijungimas = 0; // Žymė rankiniam AT siurblio valdymui
 /* ********** PID nustatymai ************************************ */    
     config.Kp = 25;
     config.Ki = 1.5;
@@ -256,16 +257,14 @@ void setup ( void ) {
 //  Setup DS18b20 temperature sensor
 
   SetupDS18B20();
-Setpoint = Boileris + config.k_skirtumas;
-  //tell the PID to range between 0 and the full window size
-  myPID.SetOutputLimits(0, config.WindowSize);
 
-  //turn the PID on
-  myPID.SetMode(AUTOMATIC);
-//  timer.setInterval(15000L, KolektoriusT);
 
   pinMode(RELAYPIN,OUTPUT);
   digitalWrite(RELAYPIN, LOW);
+    regulator.setpoint = Boileris;    // установка (ставим на 40 градусов)
+  regulator.hysteresis = config.k_skirtumas;   // ширина гистерезиса
+  regulator.k = config.Ki;          // коэффициент обратной связи (подбирается по факту)
+  //regulator.dT = 500;       // установить время итерации для getResultTimer
 }
 
  
@@ -319,22 +318,25 @@ void loop ( void ) {
     previousMillis = currentMillis;
 
     TemteraturosMatavimas();
+    Siurblys();
+
 // Jei įjungtas nuorinimo režimas arba apsauga nuo užšalimo ir kolektoriaus temperatūra artėja prie 0, įjungiamas siurblys
-    if (config.k_nuorinimas == 1 or ((Kolektorius < 0.68) & (config.k_uzsalimas == 1)))
-          { digitalWrite(RELAYPIN, HIGH); relayState = "ON(užšalimas)";
-       Serial.print("\nSiurblio rele įjungta ON (Nuorinimas, užšalimas)\n");
-       } else {Siurblys();
+//    if (config.k_nuorinimas == 1 or ((Kolektorius < config.k_uzsalimo_t) & (config.k_uzsalimas == 1)))
+//          { digitalWrite(RELAYPIN, HIGH); relayState = "ON(užšalimas)";
+//       Serial.print("\nSiurblio rele įjungta ON (Nuorinimas, užšalimas)\n");
+//       } else {Siurblys();
+       
 //Jei laikas sutampa su laiku, kai kolektoriaus šiluma niekinė, siurblys išjungiamas
 //        if (DateTime.hour == config.TurnOffHour or DateTime.hour == config.TurnOffHour +1 )
 //          { digitalWrite(RELAYPIN, LOW); relayState = "OFF(laikas)";
 //       Serial.print("\nSiurblio rele įjungta OFF (nurodytas išjungimo laikas)\n");
 //       } else {Siurblys();}
-       }
+//       }
     
 }
 /* ****************************** emoncms ****************************** */
 // tikrinama ar siuntimo intervalas ne mažesnis negu 5 sekundės.
-if (config.intervalasEmon < 5 ) config.k_intervalas = 5;
+if (config.intervalasEmon < 10 ) config.k_intervalas = 11;
 //ar aktyvuotas duomenų siuntimas į emoncms ir jau galima siųsti duomenis
     if ((config.emoncmsOn  == 1) & ((unsigned long)(currentMillis1 - previousMillis1) >= config.intervalasEmon * 1000)) 
     {

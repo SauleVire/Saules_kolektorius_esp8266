@@ -9,23 +9,17 @@ const char PAGE_AdminMainPage[] PROGMEM = R"=====(
   <div class="content">
 
 <center><a href="/" class="myButton" ><</a>
-<span class="textas"> Tinklo konfigūracija </span>
-<a href="config.html" class="myButton" >></a>  
+<span class="textas"> Valdiklio konfigūravimas </span>
+<a href="general.html" class="myButton" >></a>  
 
 <hr>
-<!-- <div align="center"><a href="general.html" style="width:222px" class="myButton" >Bendroji konfigūracija</a></div> --!>
+<div align="center"><a href="general.html" style="width:222px" class="myButton" >Bendroji konfigūracija</a></div>
 <div align="center"><a href="config.html" style="width:222px" class="myButton" >Tinklo konfigūracija</a></div>
 <div align="center"><a href="info.html"   style="width:222px"  class="myButton" >Tinklo informacija</a></div>
 <div align="center"><a href="kolektorius.html" style="width:222px"  class="myButton" >Kolektoriaus parametrai</a></div>
 <div align="center"><a href="emoncms.html" style="width:222px"  class="myButton" >Emoncms parametrai</a></div>
-<<<<<<< Updated upstream
 <div align="center"><a href="rastids18b20.html" style="width:222px"  class="myButton" >DS18B20 parametrai</a></div>
-<!-- <div align="center"><a href="ntp.html"   style="width:222px"  class="myButton" >NTP nustatymai</a></div> --!>
-=======
-<div align="center"><a href="ds18b20.html" style="width:222px"  class="myButton" >DS18B20 parametrai</a></div>
-<div align="center"><a href="rastids18b20.html" style="width:222px"  class="myButton" >DS18B20 priskirimas</a></div>
 <div align="center"><a href="ntp.html"   style="width:222px"  class="myButton" >NTP nustatymai</a></div>
->>>>>>> Stashed changes
 <div align="center"><a href="naujinimas.html"   style="width:222px"  class="myButton" >Programos naujinimas</a></div>
 <div align="center"><a href="/"   style="width:220px"  class="myButton" >Valdiklio būsena</a></div>
 

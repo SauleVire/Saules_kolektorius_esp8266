@@ -27,7 +27,7 @@ boolean summertime(int year, byte month, byte day, byte hour, byte tzHours)
    return true;
  else
    return false;
-}  
+}
 //
 // Check the Values is between 0-255
 //
@@ -42,7 +42,6 @@ boolean checkRange(String Value)
 		 return true;
 	 }
 }
-
 void WriteStringToEEPROM(int beginaddress, String string)
 {
 	char  charBuf[string.length()+1];

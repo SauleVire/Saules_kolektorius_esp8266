@@ -7,7 +7,7 @@ const char PAGE_Emoncms[] PROGMEM = R"=====(
   <div class="content">
 <center><a href="admin.html" class="myButton" ><</a>
 <span class="textas"> Emoncms nustatymai </span>
-<a href="ds18b20.html" class="myButton" >></a>
+<a href="rastids18b20.html" class="myButton" >></a>
 
 <hr>
 <form action="" method="get">

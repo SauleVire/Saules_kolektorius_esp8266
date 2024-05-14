@@ -66,7 +66,7 @@ void send_information_values_html ()
   values += "x_netmask|" +  (String) WiFi.subnetMask()[0] + "." +  (String) WiFi.subnetMask()[1] + "." +  (String) WiFi.subnetMask()[2] + "." + (String) WiFi.subnetMask()[3] +  "|div\n";
   values += "x_mac|" + GetMacAddress() +  "|div\n";
   values += "x_fw|" + FIRMWARE_VERSION +  "|div\n";
-//  values += "x_ntp|" + (String)   DateTime.year + "." + (String)  DateTime.month + "." + (String)  DateTime.day +  " " +  (String) DateTime.hour + ":" + (String) + DateTime.minute +  ":" + (String)  DateTime.second + " |div\n";
+  values += "x_ntp|" + (String)   DateTime.year + "." + (String)  DateTime.month + "." + (String)  DateTime.day +  " " +  (String) DateTime.hour + ":" + (String) + DateTime.minute +  ":" + (String)  DateTime.second + " |div\n";
   server.send ( 200, "text/plain", values);
   Serial.println(__FUNCTION__); 
 

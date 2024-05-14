@@ -8,7 +8,7 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <div class="smartphone">
   <div class="content">
-<center><span class="textas">Saulės kolektoriaus valdiklis</span></center><hr>
+<center><span class="textas">Saulės kolektoriaus valdiklis</span><hr>
 <table border="0"  cellspacing="0" cellpadding="3" style="width:300px" >
 <th colspan="2">
 <a href="/admin.html" class="myButton">Valdiklio konfigūravimas</a>
@@ -45,7 +45,7 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <th colspan=2><a href="/"  class="myButton">Atnaujinti</a></th>
 </table>
 <hr>
-<span class="textas">
+<span align="right" class="textas">
 <!-- Dabar: <span id="x_ntp"></span><br> -->
 <!-- Valdiklis veikia <span id="x_ntp2"></span> nuo <span id="x_ntp2"></span><br> -->
 <a href=https://saulevire.lt>SauleVire.lt</a> 2024 </br>

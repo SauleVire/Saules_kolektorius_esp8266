@@ -101,6 +101,7 @@ void TemteraturosMatavimas() {
   DS18B20.requestTemperatures();
   
 }
+
 void Siurblys(){
 
 // ************ Siurblio įjungimas ********************
