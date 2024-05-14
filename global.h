@@ -69,7 +69,7 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 )=====";
 
 
-String FIRMWARE_VERSION = "24.05.13";
+String FIRMWARE_VERSION = "24.05.15";
 const int FW_VERSION = 1244;
 
 //ESP8266HTTPUpdateServer httpUpdater;

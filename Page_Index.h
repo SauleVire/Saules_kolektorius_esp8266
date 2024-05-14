@@ -44,6 +44,7 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <div><span id="laikas"></span> (s)</div> 
 <div><span id="apsauga"></span></div> 
 <div><span id="nuorinimas"></span></div> 
+<div><span id="termostatas"></span></div> 
 <div><span id="t_ijungimo"></span> &deg; C</div> 
 <div><span id="t_isjungimo"></span> &deg; C</div> 
 </td></tr>
@@ -85,12 +86,13 @@ void filldynamicdata()
   values += "O_t|" + (String)Oras +  "|div\n";
   values += "K_t|" + (String)Kolektorius +  "|div\n";
   values += "B_t|" + (String)Boileris +  "|div\n";
-  values += "k_skirtumas|" + (String)config.k_skirtumas  +  "|div\n";
-  values += "k_uzsalimo_t|" + (String)config.k_uzsalimo_t  +  "|div\n";
   values += "rele|" + (String)relayState +  "|div\n";
   values += "laikas|" + (String) config.k_intervalas  +  "|div\n";
   values += "apsauga|" + (String)config.k_uzsalimas +  "|div\n";
   values += "nuorinimas|" + (String)config.k_nuorinimas +  "|div\n";
+  values += "termostatas|" + (String)config.termostatas +  "|div\n";
+   values += "t_ijungimo|" + (String) config.t_ijungimo  +  "|div\n";
+  values += "t_isjungimo|" + (String)config.t_isjungimo +  "|div\n"; 
 //  values += "x_ntp|" + (String)DateTime.year + "." + (String)DateTime.month + "." + (String)DateTime.day + " " + (String)DateTime.hour + ":" + (String)DateTime.minute + ":" + (String)DateTime.second + " |div\n";
   values += "versija|" + (String)FIRMWARE_VERSION + " |div\n";
 //values += "x_ntp2|" + (String)(NTP.getTimeDateString (NTP.getFirstSync ()).c_str ())+ " |div\n";

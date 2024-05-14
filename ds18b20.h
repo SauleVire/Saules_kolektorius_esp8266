@@ -123,5 +123,5 @@ if (Kolektorius > Boileris + config.k_skirtumas)
 //      k_nuorinimas_status = "Išjungta";
       }
 }
-void Siurblys(){
+void Termostatas(){
 }
