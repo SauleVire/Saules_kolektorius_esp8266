@@ -39,6 +39,21 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 	<td align="right"> Laikas:</td>
 	<td><input type="text" id="toffhour" name="toffhour" size="2" value="00">:<input type="text" id="toffminute" name="toffminute" size="2" value="00"></td>
 </tr>
+
+<tr>
+	<td align="right"> Aktyvinti termostatą:</td>
+	<td><input type="checkbox" id="termostatas" name="termostatas"></td>
+</tr>
+
+<tr>
+	<td align="right">Įjungimo t (°C):</td>
+	<td><input type="text" id="t_ijungimo" name="t_ijungimo" size="3" maxlength="4" value=""></td>
+</tr>
+<tr>
+	<td align="right">Išjungimo t (°C):</td>
+	<td><input type="text" id="t_isjungimo" name="t_isjungimo" size="3" maxlength="4" value=""></td>
+</tr>
+
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="myButton" value="Įrašyti"></td></tr>
 </table>
 </form>
@@ -46,7 +61,6 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 </div></div></center>
 <script>
 
- 
 
 window.onload = function ()
 {
@@ -84,6 +98,7 @@ void send_general_html()
 	{
 		config.AutoTurnOn = false;
 		config.AutoTurnOff = false;
+		config.termostatas = false;
 		String temp = "";
 		for ( uint8_t i = 0; i < server.args(); i++ ) {
 			if (server.argName(i) == "devicename") config.DeviceName = urldecode(server.arg(i)); 
@@ -93,6 +108,9 @@ void send_general_html()
 			if (server.argName(i) == "tonminute") config.TurnOnMinute =  server.arg(i).toInt(); 
 			if (server.argName(i) == "toffhour") config.TurnOffHour =  server.arg(i).toInt(); 
 			if (server.argName(i) == "toffminute") config.TurnOffMinute =  server.arg(i).toInt(); 
+      if (server.argName(i) == "termostatas") config.termostatas = true; 
+      if (server.argName(i) == "t_ijungimo") config.t_ijungimo = server.arg(i).toFloat();
+      if (server.argName(i) == "t_isjungimo") config.t_isjungimo = server.arg(i).toFloat();      
 		}
 		WriteConfig();
 		firstStart = true;
@@ -113,6 +131,9 @@ void send_general_configuration_values_html()
 	values += "toffminute|" +   (String)  config.TurnOffMinute +  "|input\n";
 	values += "toffenabled|" +  (String) (config.AutoTurnOff ? "checked" : "") + "|chk\n";
 	values += "tonenabled|" +  (String) (config.AutoTurnOn ? "checked" : "") + "|chk\n";
+	values += "termostatas|" +  (String) (config.termostatas ? "checked" : "") + "|chk\n";
+  values += "t_ijungimo|" +  (String) config.t_ijungimo + "|input\n";
+  values += "t_isjungimo|" +  (String) config.t_isjungimo + "|input\n";
 	server.send ( 200, "text/plain", values);
 	Serial.println(__FUNCTION__); 
 }

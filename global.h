@@ -106,10 +106,13 @@ struct strConfig {
 	String DeviceName;
 	boolean AutoTurnOff;
 	boolean AutoTurnOn;
+	boolean termostatas;
 	byte TurnOffHour;
 	byte TurnOffMinute;
 	byte TurnOnHour;
 	byte TurnOnMinute;
+  float t_ijungimo;
+  float t_isjungimo;
 	byte LED_R;
 	byte LED_G;
 	byte LED_B;
@@ -287,10 +290,13 @@ void WriteConfig()
 	WriteStringToEEPROM(96,config.password);
 	WriteStringToEEPROM(128,config.ntpServerName);
 
-  EEPROM.put(292,config.k_skirtumas);
-  EEPROM.put(296,config.k_uzsalimo_t);
-  EEPROM.write(300,config.AutoTurnOn);
-	EEPROM.write(301,config.AutoTurnOff);
+  EEPROM.put(283,config.t_ijungimo);
+  EEPROM.put(287,config.t_isjungimo);
+  EEPROM.put(291,config.k_skirtumas);
+  EEPROM.put(295,config.k_uzsalimo_t);
+  EEPROM.write(299,config.AutoTurnOn);
+	EEPROM.write(300,config.AutoTurnOff);
+	EEPROM.write(301,config.termostatas);
 	EEPROM.write(302,config.TurnOnHour);
 	EEPROM.write(303,config.TurnOnMinute);
 	EEPROM.write(304,config.TurnOffHour);
@@ -356,11 +362,14 @@ boolean ReadConfig()
 		config.ssid = ReadStringFromEEPROM(64);
 		config.password = ReadStringFromEEPROM(96);
 		config.ntpServerName = ReadStringFromEEPROM(128);
-		EEPROM.get (398,config.Kp);
-    EEPROM.get (292,config.k_skirtumas);
-    EEPROM.get (296,config.k_uzsalimo_t);
-		config.AutoTurnOn = EEPROM.read(300);
-		config.AutoTurnOff = EEPROM.read(301);
+	
+    EEPROM.get (283,config.t_ijungimo);
+    EEPROM.get (287,config.t_isjungimo);
+    EEPROM.get (291,config.k_skirtumas);
+    EEPROM.get (295,config.k_uzsalimo_t);
+		config.AutoTurnOn = EEPROM.read(3299);
+		config.AutoTurnOff = EEPROM.read(300);
+		config.termostatas = EEPROM.read(301);
 		config.TurnOnHour = EEPROM.read(302);
 		config.TurnOnMinute = EEPROM.read(303);
 		config.TurnOffHour = EEPROM.read(304);

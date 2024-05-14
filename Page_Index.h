@@ -27,6 +27,9 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <div align="right">Laiko intervelas :</div>
 <div align="right">Apsauga (0- išjungta):</div>
 <div align="right">Nuorinimas (0- išjungta):</div>
+<div align="right">Termostatas (0- išjungta):</div>
+<div align="right">Įjungimo t:</div>
+<div align="right">Išjungimo t:</div>
 </td><td> 
 <div><span id="S_t"></span>&deg; C</div> 
 <div><span id="R_t"></span>&deg; C</div> 
@@ -41,6 +44,8 @@ const char PAGE_EXAMPLE[] PROGMEM = R"=====(
 <div><span id="laikas"></span> (s)</div> 
 <div><span id="apsauga"></span></div> 
 <div><span id="nuorinimas"></span></div> 
+<div><span id="t_ijungimo"></span> &deg; C</div> 
+<div><span id="t_isjungimo"></span> &deg; C</div> 
 </td></tr>
 <th colspan=2><a href="/"  class="myButton">Atnaujinti</a></th>
 </table>
