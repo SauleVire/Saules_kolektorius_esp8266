@@ -18,7 +18,8 @@ const char PAGE_AdminMainPage[] PROGMEM = R"=====(
 <div align="center"><a href="info.html"   style="width:222px"  class="myButton" >Tinklo informacija</a></div>
 <div align="center"><a href="kolektorius.html" style="width:222px"  class="myButton" >Kolektoriaus parametrai</a></div>
 <div align="center"><a href="emoncms.html" style="width:222px"  class="myButton" >Emoncms parametrai</a></div>
-<div align="center"><a href="rastids18b20.html" style="width:222px"  class="myButton" >DS18B20 parametrai</a></div>
+<div align="center"><a href="ds18b20.html" style="width:222px"  class="myButton" >DS18B20 jutikliai</a></div>
+<div align="center"><a href="rastids18b20.html" style="width:222px"  class="myButton" >DS18B20 priskirimas</a></div>
 <div align="center"><a href="ntp.html"   style="width:222px"  class="myButton" >NTP nustatymai</a></div>
 <div align="center"><a href="naujinimas.html"   style="width:222px"  class="myButton" >Programos naujinimas</a></div>
 <div align="center"><a href="/"   style="width:220px"  class="myButton" >Valdiklio būsena</a></div>

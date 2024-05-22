@@ -6,9 +6,9 @@ void Page_DS18B20(){
   message += "<link rel=\"stylesheet\" type=\"text/css\" href=\"/style.css\">\n";
   message += "<div class=\"smartphone\">\n";
   message += "<div class=\"content\">\n";
-  message += "<center><a href=\"admin.html\"  class=\"btn btn--s\"><</a>\n";
-  message += "<strong>ds18b20 nustatymai</strong>\n";
-  message += "<a href=\"ntp.html\"  class=\"btn btn--s\">></a></center><hr>\n";
+  message += "<center><a href=\"admin.html\"  class=\"myButton\"><</a>\n";
+  message += "<strong>rasti ds18b20</strong>\n";
+  message += "<a href=\"rastids18b20.html\"  class=\"myButton\">></a></center><hr>\n";
   message += "<center>Rasta jutiklių: " + (String)numberOfDevices + "<br>\n";
   message += "<table border=\"1\">\n";
   message += "<tr><td>Jutiklio adresas</td><td>Temperatūra</td><td>Nr.</td></tr>\n";

@@ -75,7 +75,7 @@ void TemteraturosMatavimas() {
   Oras = DS18B20.getTempC(devAddr[config.Oid]);
 //float OrasWU = DS18B20.getTempF(devAddr[config.Oid]);
   // Check if any reads failed and exit
-  if (Kolektorius == -127 or Kolektorius == 85 or Kolektorius > 127 ) {
+/*  if (Kolektorius == -127 or Kolektorius == 85 or Kolektorius > 127 ) {
     Kolektorius = KolektoriusOld;
   #ifdef Diagnostika   
        Serial.println("Klaida! Ds18B20 rodmenys neteisingi");  
@@ -98,6 +98,7 @@ void TemteraturosMatavimas() {
   #endif 
          }
     else { OrasOld = Oras;}
+    */
   DS18B20.requestTemperatures();
   
 }

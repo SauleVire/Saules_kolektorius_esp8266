@@ -169,7 +169,7 @@ int WindowSize;
 //------------------------------------------
 //DS18B20
 #define ONE_WIRE_BUS 2 //Pin to which is attached a temperature sensor
-#define ONE_WIRE_MAX_DEV 5 //The maximum number of devices
+#define ONE_WIRE_MAX_DEV 8 //The maximum number of devices
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
@@ -232,14 +232,16 @@ void ConfigureWifi()
 	Serial.println("Configuring Wifi");
 	WiFi.begin (config.ssid.c_str(), config.password.c_str());
   WiFi.hostname("SauleVire");
-	if (!config.dhcp)
-	{
-		WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.DNS[0],config.DNS[1],config.DNS[2],config.DNS[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
-
+	if (!config.dhcp)	{
+	WiFi.config(IPAddress(config.IP[0],config.IP[1],config.IP[2],config.IP[3] ),  IPAddress(config.Gateway[0],config.Gateway[1],config.Gateway[2],config.Gateway[3] ) , IPAddress(config.Netmask[0],config.Netmask[1],config.Netmask[2],config.Netmask[3] ));
+// IPAddress(config.DNS[0],config.DNS[1],config.DNS[2],config.DNS[3] ),
   Serial.println("IP adresas: " + WiFi.localIP().toString()+ "\n");
-  Serial.print("SSID'as: " + config.ssid+ "\n");
-  Serial.print("Slaptažodis: " + config.password+ "\n\n");
-	}
+  Serial.print("SSID'as: " + String(config.ssid) + "\n");
+  Serial.print("Slaptažodis: " + String(config.password) + "\n\n");	}
+ else {
+  Serial.println("IP adresas: " + WiFi.localIP().toString()+ "\n");
+  Serial.print("SSID'as: " + String(config.ssid) + "\n");
+  Serial.print("Slaptažodis: " + String(config.password) + "\n\n"); }
 }
 
 void WriteConfig()

@@ -7,7 +7,7 @@ const char Page_RastiDS18B20[] PROGMEM = R"=====(
 <link rel="stylesheet" type="text/css" href="/style.css">
 <div class="smartphone">
   <div class="content">
-<center><a href="admin.html"  class="myButton"><</a><span class="textas"> DS18B20 nustatymai </span>
+<center><a href="admin.html"  class="myButton"><</a><span class="textas"> DS18B20 priskyrimas </span>
 <a href="ntp.html"  class="myButton">></a>
 
 <hr>
